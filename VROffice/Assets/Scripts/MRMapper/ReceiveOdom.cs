@@ -13,19 +13,20 @@ using UnityEngine.XR;
 using static UnityEditor.PlayerSettings;
 
 /*
- * This script moves the RealSense camera object. 
+ * This script moves the RealSense camera object.
  */
 public class ReceiveOdom : RosReceiver
 {
-
     int port = 5002;
     string log_tag = "Odom Receiver";
-    GameObject realSense;
-    
-    public void Start() {
+    [SerializeField] private GameObject realSense;
+    [SerializeField] private GameObject m_OVRRig;
+    [SerializeField] private bool m_reset = true;
+
+    public void Start()
+    {
         Setup(port, log_tag, ProcessReceivedBytes);
-        realSense = GameObject.Find("RealSense");
-    }   
+    }
 
     private void ProcessReceivedBytes(byte[] data)
     {
@@ -49,9 +50,13 @@ public class ReceiveOdom : RosReceiver
             realSense.transform.rotation = transform.rotation * cameraRot;
         }
 
+        if (m_reset)
+        {
+            transform.position = m_OVRRig.transform.position + cameraPos; //align RealSense to OVR by moving MRMapper to OVR and then move by distance between cameraPos and its origin 
+            Quaternion mappertoOVR = Quaternion.FromToRotation(transform.forward, m_OVRRig.transform.forward);
+            transform.rotation = (transform.rotation * cameraRot) * mappertoOVR;
+
+            m_reset = false;
+        }
     }
-
-
 }
-
-
