@@ -183,7 +183,7 @@ public class Calibration : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        disable();
+        //disable();
     }
 
     // Update is called once per frame

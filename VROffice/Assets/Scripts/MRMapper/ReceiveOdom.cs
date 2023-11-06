@@ -44,17 +44,17 @@ public class ReceiveOdom : RosReceiver
         Quaternion cameraRot = RtabQuatToUnity(q);
 
         //update RealSense transform
-        // if (cameraPos != Vector3.zero)
-        // {
-        //     realSense.transform.position = transform.position + cameraPos;
-        //     realSense.transform.rotation = transform.rotation * cameraRot;
-        // }
+        if (cameraPos != Vector3.zero)
+        {
+            realSense.transform.position = transform.position + cameraPos;
+            realSense.transform.rotation = transform.rotation * cameraRot;
+        }
 
         if (m_reset)
         {
-            transform.position = m_OVRRig.transform.position + cameraPos; //align RealSense to OVR by moving MRMapper to OVR and then move by distance between cameraPos and its origin 
-            Quaternion mapperToOVR = Quaternion.FromToRotation(transform.forward, m_OVRRig.transform.forward);
-            transform.rotation *= mapperToOVR; //rotate the angle between where the headset is looking and where the ROS initialized the coordinate system base
+            transform.position = m_OVRRig.transform.position; //align RealSense to OVR by moving MRMapper to OVR and then move by distance between cameraPos and its origin 
+            //Quaternion mapperToOVR = Quaternion.FromToRotation(transform.forward, m_OVRRig.transform.forward);
+            transform.rotation = m_OVRRig.transform.rotation; //rotate the angle between where the headset is looking and where the ROS initialized the coordinate system base
 
             m_reset = false;
         }
