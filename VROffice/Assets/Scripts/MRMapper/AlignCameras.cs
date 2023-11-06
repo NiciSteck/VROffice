@@ -14,8 +14,8 @@ public class AlignCameras : MonoBehaviour
     GameObject offset; 
 
     // define the position of the Oculus relative to the RealSense
-    public Vector3 realSenseToOculusPos = new Vector3(0, -0.05f, 0);
-    public Vector3 realSenseToOculusRotAngles = new Vector3(0, 0, 0);
+    public Vector3 dist_fromQuestToRealSense = new Vector3(0, 0.05f, 0);
+    public Vector3 rot_fromQuestToRealSense = new Vector3(0, 0, 0);
 
     private Quaternion realSenseToOculusRot;
 
@@ -29,15 +29,15 @@ public class AlignCameras : MonoBehaviour
 
     void Update()
     {
-        realSenseToOculusRot = Quaternion.Euler(realSenseToOculusRotAngles); 
+        realSenseToOculusRot = Quaternion.Euler(rot_fromQuestToRealSense); 
 
-        // compute where the Oculus should be positioned 
-        Vector3 shouldPos = realSenseToOculusPos + realSense.transform.position ;
-        Quaternion shouldRot = realSenseToOculusRot * realSense.transform.rotation;
+        // compute where the RealSense should be positioned 
+        Vector3 shouldPos = oculus.transform.position + dist_fromQuestToRealSense;
+        Quaternion shouldRot = oculus.transform.rotation * realSenseToOculusRot;
 
-        // where the oculus is currently positioned
-        Vector3 isPos = oculus.transform.position;
-        Quaternion isRot = oculus.transform.rotation;   
+        // where the RealSense is currently positioned
+        Vector3 isPos = realSense.transform.position;
+        Quaternion isRot = realSense.transform.rotation;   
 
 
         // compute the correction 
@@ -51,11 +51,11 @@ public class AlignCameras : MonoBehaviour
         float tPos = 0.05f;
         float tRot = 10f;
 
-
+        //move the entire MRMapper object to realign cameras and other children based on that
         if (absPosDiff > tPos || absRotDiff > tRot)
         {
-            offset.transform.position = posDiff + offset.transform.position;
-            offset.transform.rotation = rotDiff * offset.transform.rotation;
+            transform.position = posDiff + transform.position;
+            transform.rotation = rotDiff * transform.rotation;
             Debug.Log("Resetting Oculus offset"); 
         }
 
