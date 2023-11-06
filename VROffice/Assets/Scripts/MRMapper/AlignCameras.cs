@@ -27,7 +27,7 @@ public class AlignCameras : MonoBehaviour
         offset = GameObject.Find("OVRCameraRig"); 
     }
 
-    void Update()
+    public void updateCameras()
     {
         realSenseToOculusRot = Quaternion.Euler(rot_fromQuestToRealSense); 
 

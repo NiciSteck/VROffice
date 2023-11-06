@@ -23,9 +23,14 @@ public class ReceiveOdom : RosReceiver
     [SerializeField] private GameObject m_OVRRig;
     [SerializeField] private bool m_init = true;
 
+    [SerializeField] private int msgsReset = 100;
+    private int msgsReceived = 0; //should increase at 10hz
+    private AlignCameras alignCameras;
+    
     public void Start()
     {
         Setup(port, log_tag, ProcessReceivedBytes);
+        alignCameras = GetComponent<AlignCameras>();
     }
 
     private void ProcessReceivedBytes(byte[] data)
@@ -45,21 +50,29 @@ public class ReceiveOdom : RosReceiver
         
         if (m_init)
         {
-            transform.position = m_OVRRig.transform.position; //align RealSense to OVR by moving MRMapper to OVR and then move by distance between cameraPos and its origin 
-            //Quaternion mapperToOVR = Quaternion.FromToRotation(transform.forward, m_OVRRig.transform.forward);
-            transform.rotation = m_OVRRig.transform.rotation; //rotate the angle between where the headset is looking and where the ROS initialized the coordinate system base
-
-            realSense.transform.position = m_OVRRig.transform.position + new Vector3(0, 0.05f, 0);
+            transform.position = m_OVRRig.transform.position + alignCameras.dist_fromQuestToRealSense; //idk why offset is too big
+            transform.rotation = m_OVRRig.transform.rotation * Quaternion.Euler(alignCameras.rot_fromQuestToRealSense);
+            
             realSense.transform.rotation = Quaternion.Inverse(m_OVRRig.transform.rotation); //turn the camera back so it should align with OVR again
             
             m_init = false;
-            }
+        }
 
         //update RealSense transform
         if (cameraPos != Vector3.zero)
         {
             realSense.transform.position = transform.position + cameraPos;
             realSense.transform.rotation = transform.rotation * cameraRot;
+        }
+        
+        //call to AlignCameras to reset position
+        msgsReceived = (msgsReceived + 1) % msgsReset;
+        if (msgsReceived == 0)
+        {
+            if (alignCameras != null)
+            {
+                alignCameras.updateCameras();
+            }
         }
     }
 }
