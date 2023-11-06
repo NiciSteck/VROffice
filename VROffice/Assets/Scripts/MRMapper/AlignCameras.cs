@@ -37,7 +37,7 @@ public class AlignCameras : MonoBehaviour
 
         // where the RealSense is currently positioned
         Vector3 isPos = realSense.transform.position;
-        Quaternion isRot = realSense.transform.rotation;   
+        Quaternion isRot = realSense.transform.rotation;
 
 
         // compute the correction 

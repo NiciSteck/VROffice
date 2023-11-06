@@ -83,7 +83,7 @@ public class ReceiveObjects : RosReceiver
     {
         string label = classes[class_id];   
         GameObject o = new GameObject(label + " icp object");
-        o.transform.parent = transform; 
+        o.transform.SetParent(transform); 
         o.transform.position = pos;
         o.transform.rotation = rot;
 
