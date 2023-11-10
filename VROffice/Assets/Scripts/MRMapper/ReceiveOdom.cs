@@ -50,10 +50,11 @@ public class ReceiveOdom : RosReceiver
         
         if (m_init)
         {
-            transform.position = m_OVRRig.transform.position + alignCameras.dist_fromQuestToRealSense; //idk why offset is too big
-            transform.rotation = m_OVRRig.transform.rotation * Quaternion.Euler(alignCameras.rot_fromQuestToRealSense);
-            
-            realSense.transform.rotation = Quaternion.Inverse(m_OVRRig.transform.rotation); //turn the camera back so it should align with OVR again
+            Transform oTrans = m_OVRRig.transform;
+            // transform.position = oTrans.position + oTrans.up*alignCameras.dist_fromQuestToRealSense.y + oTrans.forward*alignCameras.dist_fromQuestToRealSense.z + oTrans.right*alignCameras.dist_fromQuestToRealSense.x; //idk why offset is too big
+            // transform.rotation = oTrans.rotation * Quaternion.Euler(alignCameras.rot_fromQuestToRealSense);
+            transform.position = oTrans.position + oTrans.up*alignCameras.dist_fromQuestToRealSense.y + oTrans.forward*alignCameras.dist_fromQuestToRealSense.z + oTrans.right*alignCameras.dist_fromQuestToRealSense.x; //idk why offset is too big
+            transform.rotation = oTrans.rotation * Quaternion.Euler(alignCameras.rot_fromQuestToRealSense);
             
             m_init = false;
         }
@@ -61,8 +62,8 @@ public class ReceiveOdom : RosReceiver
         //update RealSense transform
         if (cameraPos != Vector3.zero)
         {
-            realSense.transform.position = transform.position + cameraPos;
-            realSense.transform.rotation = transform.rotation * cameraRot;
+            realSense.transform.localPosition = cameraPos;
+            realSense.transform.localRotation = cameraRot;
         }
         
         //call to AlignCameras to reset position

@@ -29,11 +29,12 @@ public class AlignCameras : MonoBehaviour
 
     public void updateCameras()
     {
-        realSenseToOculusRot = Quaternion.Euler(rot_fromQuestToRealSense); 
+        realSenseToOculusRot = Quaternion.Euler(rot_fromQuestToRealSense);
+        Transform oTrans = oculus.transform;
 
         // compute where the RealSense should be positioned 
-        Vector3 shouldPos = oculus.transform.position + dist_fromQuestToRealSense;
-        Quaternion shouldRot = oculus.transform.rotation * realSenseToOculusRot;
+        Vector3 shouldPos = oTrans.position + oTrans.up*dist_fromQuestToRealSense.y + oTrans.forward*dist_fromQuestToRealSense.z + oTrans.right*dist_fromQuestToRealSense.x;
+        Quaternion shouldRot = oTrans.rotation * realSenseToOculusRot;
 
         // where the RealSense is currently positioned
         Vector3 isPos = realSense.transform.position;
@@ -53,9 +54,12 @@ public class AlignCameras : MonoBehaviour
 
         //move the entire MRMapper object to realign cameras and other children based on that
         if (absPosDiff > tPos || absRotDiff > tRot)
-        {
-            transform.position = posDiff + transform.position;
+        {   
             transform.rotation = rotDiff * transform.rotation;
+
+            isPos = realSense.transform.position;
+            posDiff = shouldPos - isPos;
+            transform.position = posDiff + transform.position;
             Debug.Log("Resetting Oculus offset"); 
         }
 

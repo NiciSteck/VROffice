@@ -1683,7 +1683,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 781657c5fb8b4c64588c0d5920989972, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dist_fromQuestToRealSense: {x: 0, y: 0.05, z: 0}
+  dist_fromQuestToRealSense: {x: 0, y: 0.03, z: 0}
   rot_fromQuestToRealSense: {x: 0, y: 0, z: 0}
 --- !u!114 &8812845789902280055
 MonoBehaviour:

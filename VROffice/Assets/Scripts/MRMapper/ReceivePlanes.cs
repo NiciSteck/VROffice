@@ -25,7 +25,7 @@ public class ReceivePlanes : RosReceiver
     string log_tag = "Plane Receiver"; 
 
     // list to store the received planes 
-    List<GameObject> planes = new List<GameObject>();
+    public List<GameObject> planes = new List<GameObject>();
 
 
     public void Start()
@@ -92,13 +92,13 @@ public class ReceivePlanes : RosReceiver
         // the position of the game object should be in the middle of the mesh 
         Vector3 cornersMean = (corners[0] + corners[1] + corners[2] + corners[3]) / 4;
         corners[0] -= cornersMean; corners[1] -= cornersMean; corners[2] -= cornersMean; corners[3] -= cornersMean;
-        plane.transform.position = cornersMean;
+        plane.transform.localPosition = cornersMean;
 
         // set the orientation to point in the normal of the plane
         Vector3 normal = GetNormal(cornersMean, corners[0], corners[1]);
         Quaternion rot = Quaternion.LookRotation(normal, corners[1] - corners[0]);
         corners[0] = Quaternion.Inverse(rot) * corners[0]; corners[1] = Quaternion.Inverse(rot) * corners[1]; corners[2] = Quaternion.Inverse(rot) * corners[2]; corners[3] = Quaternion.Inverse(rot) * corners[3];
-        plane.transform.rotation = rot;
+        plane.transform.localRotation = rot;
 
         // Create the mesh
         Mesh rectangleMesh = new Mesh();

@@ -22,7 +22,7 @@ public class ReceiveObjects : RosReceiver
     int port = 5004;
     string log_tag = "Objt Receiver";
 
-    private List<GameObject> icpObjects = new List<GameObject>();
+    public List<GameObject> icpObjects = new List<GameObject>();
     Mesh chairMesh; 
 
 
@@ -84,8 +84,8 @@ public class ReceiveObjects : RosReceiver
         string label = classes[class_id];   
         GameObject o = new GameObject(label + " icp object");
         o.transform.SetParent(transform); 
-        o.transform.position = pos;
-        o.transform.rotation = rot;
+        o.transform.localPosition = pos;
+        o.transform.localRotation = rot;
 
         // Add chair mesh 
         MeshFilter meshFilter = o.AddComponent<MeshFilter>();
