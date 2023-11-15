@@ -8,6 +8,7 @@ public class EnvModel : MonoBehaviour , IComparable<EnvModel>
     [NonSerialized]
     public int similarity = 0;
     
+    //an environment has at least one container
     [SerializeField]
     public List<ContainerModel> containers = new List<ContainerModel>();
     

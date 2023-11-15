@@ -10,6 +10,8 @@ public class RecognizeEnv : MonoBehaviour
 
     [SerializeField]
     private GameObject mrMapper;
+
+    [SerializeField] private bool align = false;
     
     // Start is called before the first frame update
     void Start()
@@ -25,7 +27,22 @@ public class RecognizeEnv : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (align)
+        {
+            GameObject env = recognize().gameObject;
+            GameObject mainPlane = null;
+            //get the assigned main plane of the environment to calibrate with it
+            foreach (Transform planeObject in env.transform)
+            {
+                if (planeObject.gameObject.name.Contains("main"))
+                {
+                    mainPlane = planeObject.GetChild(0).gameObject;
+                }
+            }
+
+            Vector3[] corners = mainPlane.GetComponent<MeshFilter>().sharedMesh.vertices;
+        }
+        align = false;
     }
     
     //returns the most similar Environment to the Surfaces recognized by MRMapper
@@ -59,7 +76,11 @@ public class RecognizeEnv : MonoBehaviour
                 envModel.similarity += symmDiff(nrMapper, nrEnv);
             }
             
+            //surface area
             
+            //angles/normals
+            
+            //distance between planes
         }
         
         envList.Sort();

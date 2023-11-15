@@ -139,7 +139,7 @@ GameObject:
   - component: {fileID: 57563321}
   - component: {fileID: 57563322}
   m_Layer: 0
-  m_Name: Monitor2
+  m_Name: tv plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -469,7 +469,7 @@ GameObject:
   - component: {fileID: 371069774}
   - component: {fileID: 371069775}
   m_Layer: 0
-  m_Name: Monitor1
+  m_Name: tv plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -701,6 +701,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 790956217}
+  - component: {fileID: 790956218}
   m_Layer: 0
   m_Name: Env-MyRoom
   m_TagString: Untagged
@@ -726,6 +727,22 @@ Transform:
   m_Father: {fileID: 1227567374}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &790956218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 790956216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f72dddd76828e9488ce3a0828e56465, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  containers:
+  - {fileID: 57563322}
+  - {fileID: 371069775}
+  - {fileID: 1288727683}
 --- !u!1 &1227567373
 GameObject:
   m_ObjectHideFlags: 0
@@ -735,6 +752,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1227567374}
+  - component: {fileID: 1227567375}
   m_Layer: 0
   m_Name: Environments
   m_TagString: Untagged
@@ -758,6 +776,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1227567375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1227567373}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52125ee5aba325d458e37ec39300ebbf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mrMapper: {fileID: 8812845789902280045}
+  align: 0
 --- !u!1 &1284866511
 GameObject:
   m_ObjectHideFlags: 0
@@ -866,7 +898,7 @@ GameObject:
   - component: {fileID: 1288727682}
   - component: {fileID: 1288727683}
   m_Layer: 0
-  m_Name: Keyboard
+  m_Name: keyboard plane - main
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1643,6 +1675,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d69e1678e85b014489d2eb64ed87657c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  icpObjects: []
 --- !u!114 &8812845789902280049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1655,6 +1688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4507dc091e6c3474f9cc60f3505f7c47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  planes: []
 --- !u!4 &8812845789902280051
 Transform:
   m_ObjectHideFlags: 0
