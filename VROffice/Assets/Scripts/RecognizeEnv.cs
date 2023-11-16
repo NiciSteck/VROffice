@@ -12,6 +12,12 @@ public class RecognizeEnv : MonoBehaviour
     private GameObject mrMapper;
 
     [SerializeField] private bool align = false;
+
+    [SerializeField] 
+    private GameObject calibratior;
+
+    [SerializeField]
+    private GameObject debugPlane;
     
     // Start is called before the first frame update
     void Start()
@@ -30,7 +36,7 @@ public class RecognizeEnv : MonoBehaviour
         if (align)
         {
             GameObject env = recognize().gameObject;
-            GameObject mainPlane = null;
+            GameObject mainPlane = debugPlane;
             //get the assigned main plane of the environment to calibrate with it
             foreach (Transform planeObject in env.transform)
             {
@@ -41,6 +47,18 @@ public class RecognizeEnv : MonoBehaviour
             }
 
             Vector3[] corners = mainPlane.GetComponent<MeshFilter>().sharedMesh.vertices;
+            Array.Sort(corners, new Vector3Comparer());
+            
+            //transform corners to WorldSpace
+            for (int i = 0; i < corners.Length; i++)
+            {
+                corners[i] = mainPlane.transform.TransformPoint(corners[i]);
+            }
+          
+            
+            calibratior.GetComponent<MRCalibration>().Calibrate(corners);
+
+
         }
         align = false;
     }
