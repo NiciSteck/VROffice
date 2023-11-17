@@ -36,7 +36,10 @@ public class RecognizeEnv : MonoBehaviour
         if (align)
         {
             GameObject env = recognize().gameObject;
-            env.SetActive(true);
+            if (!env.activeSelf)
+            {
+                env.SetActive(true);
+            }
             GameObject mainPlane = null;
             
             //get the assigned main plane of the environment to calibrate with it
@@ -49,8 +52,10 @@ public class RecognizeEnv : MonoBehaviour
             }
             
             GameObject targetPlane = debugPlane;
-            foreach (GameObject mrPlane in mrMapper.transform)
+            //get the target plane from MRMapper
+            foreach (Transform mrPlaneTrans in mrMapper.transform)
             {
+                GameObject mrPlane = mrPlaneTrans.gameObject;
                 String mainName = mainPlane.transform.parent.gameObject.name.Split()[0];
                 if (mrPlane.name.Contains(mainName))
                 {
@@ -64,14 +69,16 @@ public class RecognizeEnv : MonoBehaviour
             
             Quaternion isRot = getRealRotation(mainPlane);
             Quaternion rotDiff = shouldRot * Quaternion.Inverse(isRot);
-            transform.rotation = rotDiff * transform.rotation;
+            env.transform.rotation = rotDiff * env.transform.rotation;
             
             Vector3 isPos = mainPlane.transform.position;
-            transform.position += shouldPos - isPos;
+            env.transform.position += shouldPos - isPos;
 
             //maybeTODO keep env in upright position
             
-
+            
+            
+            //calibrator.GetComponent<MRCalibration>().Calibrate(getRealCorners(targetPlane)); //only works correctly if the vertices are passed in the same order as when virtual reference was created
         }
         align = false;
     }
@@ -84,18 +91,21 @@ public class RecognizeEnv : MonoBehaviour
 
         Vector3[] corners = getRealCorners(plane);
         
+        Vector3 cornersMean = (corners[0] + corners[1] + corners[2] + corners[3]) / 4;
         Vector3 ba = corners[0] - corners[2];
+        Vector3 baCenter = (corners[2] + corners[0]) / 2;
         Vector3 bc = corners[3] - corners[2];
+        Vector3 bcCenter = (corners[2] + corners[3]) / 2;
         
         if (ba.magnitude > bc.magnitude)
         {
-            Vector3 normal = Vector3.Cross(ba,bc);
-            return Quaternion.LookRotation(ba,normal);
+            Vector3 normal = Vector3.Cross(baCenter - cornersMean, bcCenter - cornersMean);
+            return Quaternion.LookRotation(baCenter - cornersMean,normal);
         }
         else
         {
-            Vector3 normal = Vector3.Cross(bc,ba);
-            return Quaternion.LookRotation(bc, normal);
+            Vector3 normal = Vector3.Cross(bcCenter - cornersMean,baCenter - cornersMean);
+            return Quaternion.LookRotation(bcCenter - cornersMean, normal);
         }
     }
 
@@ -119,6 +129,8 @@ public class RecognizeEnv : MonoBehaviour
             corners[1] = (vertices[2] + vertices[3])/2;
             corners[2] = (vertices[4] + vertices[5])/2;
             corners[3] = (vertices[6] + vertices[7])/2;
+
+            
         } else
         {
             corners = vertices; //if there is an error here the provided Mesh is not supported (only planes with 4 vertices or cubes from AdaptiveInput)
