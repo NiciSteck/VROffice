@@ -36,7 +36,8 @@ public class RecognizeEnv : MonoBehaviour
         if (align)
         {
             GameObject env = recognize().gameObject;
-            GameObject mainPlane = debugPlane;
+            GameObject mainPlane = null;
+            
             //get the assigned main plane of the environment to calibrate with it
             foreach (Transform planeObject in env.transform)
             {
@@ -45,22 +46,67 @@ public class RecognizeEnv : MonoBehaviour
                     mainPlane = planeObject.GetChild(0).gameObject;
                 }
             }
-
-            Vector3[] corners = mainPlane.GetComponent<MeshFilter>().sharedMesh.vertices;
-            Array.Sort(corners, new Vector3Comparer());
             
-            //transform corners to WorldSpace
-            for (int i = 0; i < corners.Length; i++)
-            {
-                corners[i] = mainPlane.transform.TransformPoint(corners[i]);
-            }
-          
+            GameObject targetPlane = debugPlane;
+            //TODO get the detected plane
             
-            calibratior.GetComponent<MRCalibration>().Calibrate(corners);
-
+            Vector3 shouldPos = targetPlane.transform.position;
+            Quaternion shouldRot = getRealRotation(targetPlane);
+            
+            Quaternion isRot = getRealRotation(mainPlane);
+            Quaternion rotDiff = shouldRot * Quaternion.Inverse(isRot);
+            transform.rotation = rotDiff * transform.rotation;
+            
+            Vector3 isPos = mainPlane.transform.position;
+            transform.position += shouldPos - isPos;
 
         }
         align = false;
+    }
+    
+    //finds the Rotation of a plane if it had the coordinate system up = surface normal and forward = long edge
+    private Quaternion getRealRotation(GameObject plane)
+    {
+        Vector3[] vertices = plane.GetComponent<MeshFilter>().sharedMesh.vertices;
+        
+        for (int i = 0; i < vertices.Length; i++)
+        { 
+            vertices[i] = plane.transform.TransformPoint(vertices[i]);
+        }
+        
+        vertices = vertices.Distinct().ToArray();
+        Array.Sort(vertices,new Vector3Comparer());
+        
+        //since the planes of AdaptiveInput are scaled cubes we have 8 points which we need to merge to 4 (hopefully they are sorted correctly)
+        Vector3[] corners = new Vector3[4];
+        if (vertices.Length == 8)
+        {
+            corners[0] = (vertices[0] + vertices[1])/2;
+            corners[1] = (vertices[2] + vertices[3])/2;
+            corners[2] = (vertices[4] + vertices[5])/2;
+            corners[3] = (vertices[6] + vertices[7])/2;
+        } else
+        {
+            corners = vertices; //if there is an error here the provided Mesh is not supported (only planes with 4 vertices or cubes from AdaptiveInput)
+        }
+        
+        
+        Vector3 cornersMean = (corners[0] + corners[1] + corners[2] + corners[3]) / 4;
+        Vector3 ba = corners[0] - corners[2];
+        Vector3 baCenter = (corners[2] + corners[0]) / 2;
+        Vector3 bc = corners[3] - corners[2];
+        Vector3 bcCenter = (corners[2] + corners[3]) / 2;
+        
+        if (ba.magnitude > bc.magnitude)
+        {
+            Vector3 normal = Vector3.Cross(baCenter - cornersMean, bcCenter - cornersMean);
+            return Quaternion.LookRotation(ba,normal);
+        }
+        else
+        {
+            Vector3 normal = Vector3.Cross(bcCenter - cornersMean,baCenter - cornersMean);
+            return Quaternion.LookRotation(bc, normal);
+        }
     }
     
     //returns the most similar Environment to the Surfaces recognized by MRMapper

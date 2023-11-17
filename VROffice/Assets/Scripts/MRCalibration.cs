@@ -75,7 +75,7 @@ public class MRCalibration : MonoBehaviour
                 m_environment.position = m_calibrationFeedback.transform.position - m_virtualReference.position;
                 //if we create environments with MRMapper make sure to always choose the same orientation
                 m_environment.RotateAround(m_virtualReference.position, Vector3.up, Vector3.SignedAngle(m_virtualReference.up, m_calibrationFeedback.transform.up, Vector3.up));
-
+                
                 // Update element transforms 
                 //VirtualEnvironmentManager.Environment.updateTransforms();
                 //m_environment.position = m_points[0];
@@ -93,7 +93,6 @@ public class MRCalibration : MonoBehaviour
         //disable();
     }
 
-    // Update is called once per frame
     public void Calibrate(Vector3[] vertices)
     {
         m_calibrationFeedback.SetActive(true);
@@ -101,10 +100,10 @@ public class MRCalibration : MonoBehaviour
         updatePoint(vertices[0], Quaternion.identity);
         setPoint(vertices[0]);
         
-        updatePoint(vertices[2], Quaternion.identity);
+        updatePoint(vertices[1], Quaternion.identity);
         setPoint(vertices[2]);
         
-        updatePoint(vertices[3], Quaternion.identity);
+        updatePoint(vertices[2], Quaternion.identity);
         setPoint(vertices[3]);
 
         reset();
