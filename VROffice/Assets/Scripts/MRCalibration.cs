@@ -100,10 +100,10 @@ public class MRCalibration : MonoBehaviour
         updatePoint(vertices[0], Quaternion.identity);
         setPoint(vertices[0]);
         
-        updatePoint(vertices[1], Quaternion.identity);
+        updatePoint(vertices[2], Quaternion.identity);
         setPoint(vertices[2]);
         
-        updatePoint(vertices[2], Quaternion.identity);
+        updatePoint(vertices[3], Quaternion.identity);
         setPoint(vertices[3]);
 
         reset();

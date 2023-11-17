@@ -57,15 +57,24 @@ public class RosReceiver : MonoBehaviour
     }
 
 
+    // public Vector3 RtabVecToUnity(float[] pos)
+    // {
+    //     Quaternion q = Quaternion.Euler(90, 90, 180);
+    //
+    //     Vector3 vec = new Vector3();
+    //     vec.x = pos[0];
+    //     vec.y = pos[1];
+    //     vec.z = -pos[2];
+    //     return q * vec;
+    // }
+    
     public Vector3 RtabVecToUnity(float[] pos)
     {
-        Quaternion q = Quaternion.Euler(90, 90, 180);
-
         Vector3 vec = new Vector3();
-        vec.x = pos[0];
-        vec.y = pos[1];
-        vec.z = -pos[2];
-        return q * vec;
+        vec.x = -pos[1];
+        vec.y = pos[2];
+        vec.z = pos[0];
+        return vec;
     }
 
     public Quaternion RtabQuatToUnity(float[] quat)

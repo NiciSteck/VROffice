@@ -14,7 +14,7 @@ public class RecognizeEnv : MonoBehaviour
     [SerializeField] private bool align = false;
 
     [SerializeField] 
-    private GameObject calibratior;
+    private GameObject calibrator;
 
     [SerializeField]
     private GameObject debugPlane;
@@ -36,6 +36,7 @@ public class RecognizeEnv : MonoBehaviour
         if (align)
         {
             GameObject env = recognize().gameObject;
+            env.SetActive(true);
             GameObject mainPlane = null;
             
             //get the assigned main plane of the environment to calibrate with it
@@ -48,7 +49,15 @@ public class RecognizeEnv : MonoBehaviour
             }
             
             GameObject targetPlane = debugPlane;
-            //TODO get the detected plane
+            foreach (GameObject mrPlane in mrMapper.transform)
+            {
+                String mainName = mainPlane.transform.parent.gameObject.name.Split()[0];
+                if (mrPlane.name.Contains(mainName))
+                {
+                    targetPlane = mrPlane;
+                    break;
+                }
+            }
             
             Vector3 shouldPos = targetPlane.transform.position;
             Quaternion shouldRot = getRealRotation(targetPlane);
@@ -60,12 +69,37 @@ public class RecognizeEnv : MonoBehaviour
             Vector3 isPos = mainPlane.transform.position;
             transform.position += shouldPos - isPos;
 
+            //maybeTODO keep env in upright position
+            
+
         }
         align = false;
     }
     
-    //finds the Rotation of a plane if it had the coordinate system up = surface normal and forward = long edge
+    //finds the Rotation of a plane if it had the coordinate system up = surface normal and forward = long edge.
+    //(Only gives the right result if surface is recognized from roughly the same position else it might be flipped)
     private Quaternion getRealRotation(GameObject plane)
+    {
+        Vector3[] vertices = plane.GetComponent<MeshFilter>().sharedMesh.vertices;
+
+        Vector3[] corners = getRealCorners(plane);
+        
+        Vector3 ba = corners[0] - corners[2];
+        Vector3 bc = corners[3] - corners[2];
+        
+        if (ba.magnitude > bc.magnitude)
+        {
+            Vector3 normal = Vector3.Cross(ba,bc);
+            return Quaternion.LookRotation(ba,normal);
+        }
+        else
+        {
+            Vector3 normal = Vector3.Cross(bc,ba);
+            return Quaternion.LookRotation(bc, normal);
+        }
+    }
+
+    private Vector3[] getRealCorners(GameObject plane)
     {
         Vector3[] vertices = plane.GetComponent<MeshFilter>().sharedMesh.vertices;
         
@@ -89,24 +123,8 @@ public class RecognizeEnv : MonoBehaviour
         {
             corners = vertices; //if there is an error here the provided Mesh is not supported (only planes with 4 vertices or cubes from AdaptiveInput)
         }
-        
-        
-        Vector3 cornersMean = (corners[0] + corners[1] + corners[2] + corners[3]) / 4;
-        Vector3 ba = corners[0] - corners[2];
-        Vector3 baCenter = (corners[2] + corners[0]) / 2;
-        Vector3 bc = corners[3] - corners[2];
-        Vector3 bcCenter = (corners[2] + corners[3]) / 2;
-        
-        if (ba.magnitude > bc.magnitude)
-        {
-            Vector3 normal = Vector3.Cross(baCenter - cornersMean, bcCenter - cornersMean);
-            return Quaternion.LookRotation(ba,normal);
-        }
-        else
-        {
-            Vector3 normal = Vector3.Cross(bcCenter - cornersMean,baCenter - cornersMean);
-            return Quaternion.LookRotation(bc, normal);
-        }
+
+        return corners;
     }
     
     //returns the most similar Environment to the Surfaces recognized by MRMapper

@@ -41,6 +41,7 @@ public class ReceiveOdom : RosReceiver
         v[2] = BitConverter.ToSingle(data, 8);
         Vector3 cameraPos = RtabVecToUnity(v);
 
+            
         float[] q = new float[4];
         q[0] = BitConverter.ToSingle(data, 12);
         q[1] = BitConverter.ToSingle(data, 16);
@@ -48,22 +49,21 @@ public class ReceiveOdom : RosReceiver
         q[3] = BitConverter.ToSingle(data, 24);
         Quaternion cameraRot = RtabQuatToUnity(q);
         
-        if (m_init)
-        {
-            Transform oTrans = m_OVRRig.transform;
-            // transform.position = oTrans.position + oTrans.up*alignCameras.dist_fromQuestToRealSense.y + oTrans.forward*alignCameras.dist_fromQuestToRealSense.z + oTrans.right*alignCameras.dist_fromQuestToRealSense.x; //idk why offset is too big
-            // transform.rotation = oTrans.rotation * Quaternion.Euler(alignCameras.rot_fromQuestToRealSense);
-            transform.position = oTrans.position + oTrans.up*alignCameras.dist_fromQuestToRealSense.y + oTrans.forward*alignCameras.dist_fromQuestToRealSense.z + oTrans.right*alignCameras.dist_fromQuestToRealSense.x; //idk why offset is too big
-            transform.rotation = oTrans.rotation * Quaternion.Euler(alignCameras.rot_fromQuestToRealSense);
-            
-            m_init = false;
-        }
+         //truns the entire MRMapper Object such that the unity and ROS coordinate systems are aligned
+         if (m_init)
+         {
+             Transform oTrans = m_OVRRig.transform;
+             transform.position = oTrans.position + oTrans.up*alignCameras.dist_fromQuestToRealSense.y + oTrans.forward*alignCameras.dist_fromQuestToRealSense.z + oTrans.right*alignCameras.dist_fromQuestToRealSense.x; //idk why offset is too big
+             transform.rotation = oTrans.rotation * Quaternion.Euler(alignCameras.rot_fromQuestToRealSense);
+             
+             m_init = false;
+         }
 
         //update RealSense transform
         if (cameraPos != Vector3.zero)
         {
             realSense.transform.localPosition = cameraPos;
-            realSense.transform.localRotation = cameraRot;
+            //realSense.transform.localRotation = cameraRot;
         }
         
         //call to AlignCameras to reset position
