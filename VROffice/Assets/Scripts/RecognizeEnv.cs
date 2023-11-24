@@ -84,7 +84,7 @@ public class RecognizeEnv : MonoBehaviour
     }
     
     //finds the Rotation of a plane if it had the coordinate system up = surface normal and forward = long edge.
-    //(Only gives the right result if surface is recognized from roughly the same position else it might be flipped)
+    //(Only gives the right result if the same corner is closest to the camera)
     private Quaternion getRealRotation(GameObject plane)
     {
         Vector3[] vertices = plane.GetComponent<MeshFilter>().sharedMesh.vertices;
@@ -92,21 +92,49 @@ public class RecognizeEnv : MonoBehaviour
         Vector3[] corners = getRealCorners(plane);
         
         Vector3 cornersMean = (corners[0] + corners[1] + corners[2] + corners[3]) / 4;
-        Vector3 ba = corners[0] - corners[2];
-        Vector3 baCenter = (corners[2] + corners[0]) / 2;
-        Vector3 bc = corners[3] - corners[2];
-        Vector3 bcCenter = (corners[2] + corners[3]) / 2;
         
-        if (ba.magnitude > bc.magnitude)
+        Vector3 shortSide = getShortSide(corners);
+        Vector3 longSide = getLongSide(corners);
+
+        Vector3 normal = Vector3.Cross(longSide,shortSide);
+        return Quaternion.LookRotation(longSide,normal);
+        
+    }
+    
+    /// <param name="corners"> the corners of a plane sorted by the Vector3Comparer </param>
+    private Vector3 getShortSide(Vector3[] corners)
+    {
+        Vector3 zero = corners[0];
+        Vector3[] fromZero = { corners[0] - corners[1],corners[0] - corners[2],corners[0] - corners[3]};
+        Vector3 shortest = fromZero[0];
+        foreach (Vector3 curr in fromZero)
         {
-            Vector3 normal = Vector3.Cross(baCenter - cornersMean, bcCenter - cornersMean);
-            return Quaternion.LookRotation(baCenter - cornersMean,normal);
+            if (curr.magnitude < shortest.magnitude)
+            {
+                shortest = curr;
+            }
         }
-        else
+        return shortest;
+    }
+    
+    /// <param name="corners"> the corners of a plane sorted by the Vector3Comparer </param>
+    private Vector3 getLongSide(Vector3[] corners)
+    {
+        Vector3 zero = corners[0];
+        Vector3[] fromZero = { corners[0] - corners[1],corners[0] - corners[2],corners[0] - corners[3]};
+        Vector3 middle = fromZero[0];
+        for (int i = 0; i < 3; i++)
         {
-            Vector3 normal = Vector3.Cross(bcCenter - cornersMean,baCenter - cornersMean);
-            return Quaternion.LookRotation(bcCenter - cornersMean, normal);
+            if (fromZero[i].magnitude > fromZero[(i + 1) % 3].magnitude &&
+                fromZero[i].magnitude < fromZero[(i + 2) % 3].magnitude
+                ||
+                fromZero[i].magnitude < fromZero[(i + 1) % 3].magnitude &&
+                fromZero[i].magnitude > fromZero[(i + 2) % 3].magnitude)
+            {
+                middle = fromZero[i];
+            }
         }
+        return middle;
     }
 
     private Vector3[] getRealCorners(GameObject plane)
