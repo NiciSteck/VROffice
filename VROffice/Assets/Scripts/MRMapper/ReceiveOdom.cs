@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.XR;
 using static UnityEditor.PlayerSettings;
@@ -26,13 +28,21 @@ public class ReceiveOdom : RosReceiver
     [SerializeField] private int msgsReset = 100;
     private int msgsReceived = 0; //should increase at 10hz
     private AlignCameras alignCameras;
+
+    private List<String> log = new List<string>();
+    private int logIndex = 0;
     
     public void Start()
     {
         Setup(port, log_tag, ProcessReceivedBytes);
         alignCameras = GetComponent<AlignCameras>();
     }
-
+    
+    void OnDestroy()
+    {
+        File.WriteAllLines(@"D:\BachelorThesis\VROffice\Logs\UnityOdomLog.txt",log);
+    }
+    
     private void ProcessReceivedBytes(byte[] data)
     {
         float[] v = new float[3];
@@ -49,6 +59,10 @@ public class ReceiveOdom : RosReceiver
         q[3] = BitConverter.ToSingle(data, 24);
         Quaternion cameraRot = RtabQuatToUnity(q);
         
+        log.Add(logIndex + ": " + cameraPos.ToString("F5") + ", " + cameraRot.ToString("F5"));
+        Debug.Log(logIndex);
+        logIndex++;
+        
          //truns the entire MRMapper Object such that the unity and ROS coordinate systems are aligned
          if (m_init)
          {
@@ -63,7 +77,7 @@ public class ReceiveOdom : RosReceiver
         if (cameraPos != Vector3.zero)
         {
             realSense.transform.localPosition = cameraPos;
-            //realSense.transform.localRotation = cameraRot;
+            realSense.transform.localRotation = cameraRot;
         }
         
         //call to AlignCameras to reset position
