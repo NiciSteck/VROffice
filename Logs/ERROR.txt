@@ -1,0 +1,1 @@
+[ERROR] [1701104393.601593501]: Client [/odom_to_unity] wants topic /rtabmap/localization_pose to have datatype/md5sum [geometry_msgs/PoseWithCovariance/c23e848cf1b7533a8d7c259073a97e6f], but our version has [geometry_msgs/PoseWithCovarianceStamped/953b798c0f514ff060a53a3498ce6246]. Dropping connection.
