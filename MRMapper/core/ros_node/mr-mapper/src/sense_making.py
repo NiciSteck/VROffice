@@ -48,7 +48,7 @@ def capture_callback(event):
     """
     This callback function in periodically exectued and its purpose it 
     to periodically start the sense making pipeline.
-    Adjust the frequency of its execution with FREQ_PLANE_EXTRACTION constant. 
+    Adjust the frequency of its execution with FREQ_SENSE_MAKING constant. 
     It guarantees that no captures run concurrently with locking. 
 
     Args:

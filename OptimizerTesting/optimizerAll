@@ -1,5 +1,7 @@
 from scipy.optimize import minimize
 import numpy as np
+import files
+from scipy.spatial.transform import Rotation
 
 #what if we just use SVD variant?
 def objective(flatRotMatrix,envPlanesPoints, mrPlanesPoints):
@@ -9,23 +11,23 @@ def objective(flatRotMatrix,envPlanesPoints, mrPlanesPoints):
     centeredEnv = envPlanesPoints - mean_env
     centeredMr = mrPlanesPoints - mean_mr
 
-    fittedEnvPoints = np.dot(centeredEnv,flatRotMatrix.reshape(3,3))
+    fittedEnvPoints = np.apply_along_axis(lambda x: np.matmul(flatRotMatrix.reshape(3,3),x),1,centeredEnv)
     #find the sum of the distances between the pointsin fittedEnvPoints and the closes point in mrPlanesPoints
     sumOfDistances = 0 
-    for point in centeredEnv:
-        minDistance = np.inf
+    for point in fittedEnvPoints:
         for mrPoint in centeredMr:
             distance = np.linalg.norm(point-mrPoint)
-            if distance < minDistance:
-                minDistance = distance
-        sumOfDistances += minDistance
+            sumOfDistances += distance
     return sumOfDistances
 
-env = np.genfromtxt("envPlaneFile.txt")
-mr = np.genfromtxt("mrPlaneFile.txt")
+env = np.genfromtxt(files.ENV)
+mr = np.genfromtxt(files.MR)
 
 
 solution = minimize(objective, np.identity(3).flatten(), args=(env,mr), method='SLSQP', options={'disp': True})
-#solution = minimize(objective, np.identity(3).flatten(), args=(X_mov,X_fix), options={'disp': True})
-print(solution.x.reshape(3,3))
-
+#solution = minimize(objective, np.identity(3).flatten(), args=(env,mr), options={'disp': True})
+R = solution.x.reshape(3,3)
+print(R)
+r =  Rotation.from_matrix(R)
+angles = r.as_euler("zyx",degrees=True)
+print(angles)
