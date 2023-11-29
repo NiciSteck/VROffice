@@ -55,8 +55,8 @@ mr = np.genfromtxt(files.MR)
 
 solution = rigid_transform_3D(env.T,mr.T)
 rotation = solution[0]
-print(rotation)
-print(solution[1])
 r =  Rotation.from_matrix(rotation)
+sol = r.as_quat()
+print("({}f, {}f, {}f, {}f)".format(sol[0],sol[1],sol[2],sol[3]))
 angles = r.as_euler("zyx",degrees=True)
 print(angles)

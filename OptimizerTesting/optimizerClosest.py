@@ -4,21 +4,16 @@ import files
 from scipy.spatial.transform import Rotation
 
 
-def objective(flatRotMatrix,envPlanesPoints, mrPlanesPoints):
-    mean_env = np.mean(envPlanesPoints, axis=0)
-    mean_mr = np.mean(mrPlanesPoints, axis=0)
-
-    centeredEnv = envPlanesPoints - mean_env
-    centeredMr = mrPlanesPoints - mean_mr
-
-
-    fittedEnvPoints = np.apply_along_axis(lambda x: np.matmul(flatRotMatrix.reshape(3,3),x),1,centeredEnv)
+def objective(quat,envPlanesPoints, mrPlanesPoints):
+    rot = Rotation.from_quat(quat)
+    
+    fittedEnvPoints = Rotation.apply(rot,envPlanesPoints)
     #find the sum of the distances between the pointsin fittedEnvPoints and the closes point in mrPlanesPoints
     sumOfDistances = 0
     for point in fittedEnvPoints:
         minDistance = np.inf
-        for mrPoint in centeredMr:
-            distance = np.linalg.norm(point-mrPoint)
+        for mrPoint in mrPlanesPoints:
+            distance = np.linalg.norm(mrPoint-point)
             if distance < minDistance:
                 minDistance = distance
         sumOfDistances += minDistance
@@ -27,11 +22,15 @@ def objective(flatRotMatrix,envPlanesPoints, mrPlanesPoints):
 env = np.genfromtxt(files.ENV)
 mr = np.genfromtxt(files.MR)
 
+mean_env = np.mean(env, axis=0)
+mean_mr = np.mean(mr, axis=0)
 
-#solution = minimize(objective, np.identity(3).flatten(), args=(env,mr), method='SLSQP', options={'disp': True})
-solution = minimize(objective, np.identity(3).flatten(), args=(env,mr), options={'disp': True})
-R = solution.x.reshape(3,3)
-print(R)
-r =  Rotation.from_matrix(R)
+centeredEnv = env - mean_env
+centeredMr = mr - mean_mr
+
+solution = minimize(objective, [0,0,0,1], args=(centeredEnv,centeredMr), options={'disp': True})
+sol = solution.x
+print("({}f, {}f, {}f, {}f)".format(sol[0],sol[1],sol[2],sol[3]))
+r = Rotation.from_quat(sol)
 angles = r.as_euler("xyz",degrees=True)
 print(angles)

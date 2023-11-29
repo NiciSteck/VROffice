@@ -154,10 +154,16 @@ public class RecognizeEnv : MonoBehaviour
         if (vertices.Length == 8)
         {
             corners[0] = (vertices[0] + vertices[1])/2;
+            if((vertices[0] - vertices[1]).magnitude > 0.01) Debug.LogWarning("Corner 1 detected wrong");
+            
             corners[1] = (vertices[2] + vertices[3])/2;
+            if((vertices[2] - vertices[3]).magnitude > 0.01) Debug.LogWarning("Corner 2 detected wrong");
+            
             corners[2] = (vertices[4] + vertices[5])/2;
+            if((vertices[4] - vertices[5]).magnitude > 0.01) Debug.LogWarning("Corner 3 detected wrong");
+            
             corners[3] = (vertices[6] + vertices[7])/2;
-
+            if((vertices[6] - vertices[7]).magnitude > 0.01) Debug.LogWarning("Corner 4 detected wrong");
             
         } else
         {

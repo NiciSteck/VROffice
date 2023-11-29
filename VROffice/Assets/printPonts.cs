@@ -20,7 +20,7 @@ public class printPonts : MonoBehaviour
             }
            
         }
-        File.WriteAllLines(@"D:\BachelorThesis\VROffice\OptimizerTesting\Pointfiles\EnvPlanes018090.txt",log);
+        File.WriteAllLines(@"D:\BachelorThesis\VROffice\OptimizerTesting\Pointfiles\EnvPlanesRand.txt",log);
     }
 
     // Update is called once per frame
