@@ -5,6 +5,7 @@ from sensor_msgs.msg import PointCloud2, Image
 from sensor_msgs.point_cloud2 import read_points
 from sensor_msgs import point_cloud2
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from cv_bridge import CvBridge
 
 import struct
@@ -122,7 +123,7 @@ def main():
     
     rospy.init_node('capture_node', anonymous=True)
     rospy.Subscriber('/rtabmap/cloud_map', PointCloud2, cloud_map_callback)
-    rospy.Subscriber('/rtabmap/odom', Odometry, odom_callback)
+    rospy.Subscriber("/rtabmap/localization_pose", PoseWithCovarianceStamped, odom_callback)
     rospy.Subscriber('/camera/rgb/image_rect_color', Image, image_callback)
     
     capture = False
