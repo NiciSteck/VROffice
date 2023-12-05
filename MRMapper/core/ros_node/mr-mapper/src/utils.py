@@ -18,7 +18,7 @@ def transform_matrix_from_odom(odom_msg):
     Converts the pose information from an odometry message to a transformation matrix.
 
     Args:
-        odom_msg (Odometry): The odometry message containing the pose information.
+        odom_msg (PoseWithCovarianceStamped): The odometry message containing the pose information.
 
     Returns:
         ndarray: The transformation matrix.

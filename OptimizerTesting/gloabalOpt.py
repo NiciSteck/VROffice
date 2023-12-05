@@ -1,4 +1,4 @@
-from scipy.optimize import minimize
+from scipy.optimize import basinhopping
 import numpy as np
 import files
 from scipy.spatial.transform import Rotation
@@ -29,7 +29,7 @@ mean_mr = np.mean(mr, axis=0)
 centeredEnv = env - mean_env
 centeredMr = mr - mean_mr
 
-solution = minimize(objective, [0,0,0,1], args=(centeredEnv,centeredMr), options={'disp': True})
+solution = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (centeredEnv,centeredMr)}, disp=True)
 sol = solution.x
 print("({}f, {}f, {}f, {}f)".format(sol[0],sol[1],sol[2],sol[3]))
 r = Rotation.from_quat(sol)

@@ -1,6 +1,7 @@
 import numpy as np
 import files
 from scipy.spatial.transform import Rotation
+import matplotlib.pyplot as plt
 
 # Input: expects 3xN matrix of points
 # Returns R,t
@@ -60,3 +61,11 @@ sol = r.as_quat()
 print("({}f, {}f, {}f, {}f)".format(sol[0],sol[1],sol[2],sol[3]))
 angles = r.as_euler("zyx",degrees=True)
 print(angles)
+
+from_x = r.apply(env)[:, 0] + solution[1][0]
+from_y = r.apply(env)[:, 1] + solution[1][1]
+plt.figure(figsize=(6,6))
+jitter = 0.005 # make points visible
+plt.scatter(from_x + jitter, from_y + jitter)
+plt.scatter(mr[:, 0], mr[:, 1])
+plt.show()

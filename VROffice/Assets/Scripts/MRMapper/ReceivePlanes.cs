@@ -96,7 +96,7 @@ public class ReceivePlanes : RosReceiver
 
         // set the orientation to point in the normal of the plane
         Vector3 normal = GetNormal(cornersMean, corners[0], corners[1]);
-        Quaternion rot = Quaternion.LookRotation(normal, corners[1] - corners[0]);
+        Quaternion rot = Quaternion.LookRotation(corners[1] - corners[0],normal);
         corners[0] = Quaternion.Inverse(rot) * corners[0]; corners[1] = Quaternion.Inverse(rot) * corners[1]; corners[2] = Quaternion.Inverse(rot) * corners[2]; corners[3] = Quaternion.Inverse(rot) * corners[3];
         plane.transform.localRotation = rot;
 

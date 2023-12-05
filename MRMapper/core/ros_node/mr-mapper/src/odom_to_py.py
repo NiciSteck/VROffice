@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 import numpy as np
-from nav_msgs.msg import PoseWithCovariance
+from geometry_msgs.msg import PoseWithCovarianceStamped
 
 from unity_sender import UnitySender 
 import constants
@@ -24,7 +24,7 @@ def main():
     sender_odom = UnitySender(constants.HOST, 5005, 'OdomPy Sender')
     sender_odom.start()
 
-    rospy.Subscriber("/rtabmap/localization_pose", PoseWithCovariance, callback_odompy)
+    rospy.Subscriber("/rtabmap/localization_pose", PoseWithCovarianceStamped, callback_odompy)
     rospy.on_shutdown(shutdown)
     rospy.spin()
 

@@ -309,7 +309,7 @@ def main():
     # subscribe to topics
     rospy.init_node('sense_making', anonymous=True)
     rospy.Subscriber('/rtabmap/cloud_map', PointCloud2, cloud_map_callback)
-    rospy.Subscriber("/rtabmap/localization_pose", PoseWithCovarianceStamped, Odometry, odom_callback)
+    rospy.Subscriber("/rtabmap/localization_pose", PoseWithCovarianceStamped, odom_callback)
     rospy.Subscriber('/camera/rgb/image_rect_color', Image, image_callback)
 
     # set timer for capture callback 

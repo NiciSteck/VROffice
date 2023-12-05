@@ -60,7 +60,6 @@ public class ReceiveOdom : RosReceiver
         Quaternion cameraRot = RtabQuatToUnity(q);
         
         log.Add(logIndex + ": " + cameraPos.ToString("F5") + ", " + cameraRot.ToString("F5"));
-        Debug.Log(logIndex);
         logIndex++;
         
          //truns the entire MRMapper Object such that the unity and ROS coordinate systems are aligned

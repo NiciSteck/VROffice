@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class applyRot : MonoBehaviour
 {
@@ -37,7 +38,7 @@ public class applyRot : MonoBehaviour
         centerRef /= nrPoints;
 
         transform.position += centerRef - center;
-        transform.rotation = new Quaternion(-0.007934051030311376f, -0.06139511392100314f, 0.037950793445485825f, 0.9790127450174141f);
+        transform.rotation *= new Quaternion(-0.004461523542345577f, 0.14947105846051298f, -0.03477046422457384f, 1.1650323509284832f);
         //transform.rotation = new Quaternion(0.25323245f ,0.76204822f, 1.39150149f, 1.12042755f);
     }
 
@@ -53,16 +54,35 @@ public class applyRot : MonoBehaviour
         vertices = vertices.Distinct().ToArray();
         Array.Sort(vertices,new Vector3Comparer());
         
-        //since the planes of AdaptiveInput are scaled cubes we have 8 points which we need to merge to 4 (hopefully they are sorted correctly)
+        //since the planes of AdaptiveInput are scaled cubes we have 8 points which we need to merge to 4
         Vector3[] corners = new Vector3[4];
         if (vertices.Length == 8)
         {
-            corners[0] = (vertices[0] + vertices[1])/2;
-            corners[1] = (vertices[2] + vertices[3])/2;
-            corners[2] = (vertices[4] + vertices[5])/2;
-            corners[3] = (vertices[6] + vertices[7])/2;
-
-            
+            int count = 0;
+            foreach (Vector3 vertex in vertices)
+            {
+                bool alreadySelected = false;
+                for (int i = 0; i < 4; i++)
+                {
+                    Vector3 corner = corners[i];
+                    if ((vertex - corner).magnitude < 0.002) //unless the plane is tiny we vertex and corner are the same corner of the planecube, just 0.001 appart
+                    {
+                        corners[i] = (vertex + corner) / 2;
+                        alreadySelected = true;
+                        break;
+                    }
+                }
+                if (!alreadySelected)
+                {
+                    corners[count] = vertex;
+                    count++;
+                }
+            }
+            Assert.AreEqual(count,4);
+            if (count != 4)
+            {
+                Debug.Log("corners might be detected wrong");
+            }
         } else
         {
             corners = vertices; //if there is an error here the provided Mesh is not supported (only planes with 4 vertices or cubes from AdaptiveInput)
