@@ -14,7 +14,7 @@
     <!-- Launch segmentation -->
     <node name="sense_making" pkg="mr-mapper" type="sense_making.py" output="screen"></node> 
 
-    <!-- Launch unity subscriber -->
-    <node name="odom_to_py" pkg="mr-mapper" type="odom_to_py.py" output="screen"></node>
+    <!-- Launch debug sender (port 5005 now occupied) -->
+    <!-- <node name="odom_to_py" pkg="mr-mapper" type="odom_to_py.py" output="screen"></node> -->
     
 </launch>

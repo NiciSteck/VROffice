@@ -7,7 +7,7 @@ indexLog = 0
 f = open('PyOdomLog.txt','w')
 
 with s.socket(s.AF_INET, s.SOCK_STREAM) as sock:
-    sock.connect((s.gethostname(), 5005))
+    sock.connect((s.gethostname(), ---))
     while True:
         lenb = sock.recv(4)
         len = int.from_bytes(lenb, byteorder='big', signed=False)

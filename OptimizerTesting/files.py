@@ -1,5 +1,5 @@
-# ENV = "Pointfiles/EnvPlanes000.txt"
-# MR = "Pointfiles/EnvPlanes018090.txt"
+ENV = "Pointfiles/EnvPlanes000.txt"
+MR = "Pointfiles/EnvPlanes018090.txt"
 
 # ENV = "Pointfiles/EnvPlanes000.txt"
 # MR = "Pointfiles/EnvPlanesRand.txt"
@@ -23,5 +23,11 @@
 # ENV = "Pointfiles/Env2SimplePlanesSorted.txt"
 # MR = "Pointfiles/Mr2SimplePlanes.txt"
 
-ENV = "Pointfiles/NewEnv2SimplePlanes.txt"
-MR = "Pointfiles/NewMr2SimplePlanes.txt"
+# ENV = "Pointfiles/NewEnv2SimplePlanes.txt"
+# MR = "Pointfiles/NewMr2SimplePlanes.txt"
+
+# ENV = "Pointfiles/NewEnvPlanes000.txt"
+# MR = "Pointfiles/NewEnvPlanesSmall.txt"
+
+ENV = "Pointfiles/NewEnvPlanes000.txt"
+MR = "Pointfiles/NewEnvPlanes018090.txt"

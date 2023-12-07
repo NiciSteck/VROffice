@@ -26,7 +26,7 @@ public class ReceiveOdom : RosReceiver
     [SerializeField] private bool m_init = true;
 
     [SerializeField] private int msgsReset = 100;
-    private int msgsReceived = 0; //should increase at 10hz
+    private int msgsReceived = 0;
     private AlignCameras alignCameras;
 
     private List<String> log = new List<string>();
