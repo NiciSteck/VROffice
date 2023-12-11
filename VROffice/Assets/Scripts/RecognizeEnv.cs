@@ -2,12 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
-using System.Net.Sockets;
 
-public class RecognizeEnv : RosReceiver
+public class RecognizeEnv : MonoBehaviour
 {
     private List<EnvModel> envList = new List<EnvModel>();
 
@@ -21,13 +19,10 @@ public class RecognizeEnv : RosReceiver
 
     [SerializeField]
     private GameObject debugPlane;
-
-    private bool waitingForOptimization = true;
-    private Quaternion optimizationResult = Quaternion.identity;
+    
     // Start is called before the first frame update
     void Start()
     {
-        Setup(5005, "Python Optimizer", ProcessReceivedBytes);
         foreach (Transform environment in transform)
         {
             EnvModel env = environment.GetComponent<EnvModel>();
@@ -79,16 +74,11 @@ public class RecognizeEnv : RosReceiver
             
             Vector3 isPos = mainPlane.transform.position;
             env.transform.position += shouldPos - isPos;
+
             //maybeTODO keep env in upright position
-
-            using (var client = new TcpClient("127.0.0.1", 5006))
-            {
-                NetworkStream stream = client.GetStream();
-                stream.Write();
-            }
-
-            StartCoroutine(WaitForOptimizationResult(env)); 
-
+            
+            
+            
             //calibrator.GetComponent<MRCalibration>().Calibrate(getRealCorners(targetPlane)); //only works correctly if the vertices are passed in the same order as when virtual reference was created
         }
         align = false;
@@ -244,24 +234,4 @@ public class RecognizeEnv : RosReceiver
     {
         return Math.Max(0, soll - Math.Abs(soll - ist));
     }
-    
-    private void ProcessReceivedBytes(byte[] data)
-    {
-        float[] q = new float[4];
-        q[0] = BitConverter.ToSingle(data, 0);
-        q[1] = BitConverter.ToSingle(data, 4);
-        q[2] = BitConverter.ToSingle(data, 8);
-        q[3] = BitConverter.ToSingle(data, 12);
-        optimizationResult = RtabQuatToUnity(q);
-        waitingForOptimization = false;
-    }
-    
-    IEnumerator WaitForOptimizationResult(GameObject env){
-        while (waitingForOptimization)
-        {
-            yield return null;
-        }
-        env.transform.rotation *= optimizationResult;
-    }
-    
 }
