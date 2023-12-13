@@ -6,7 +6,15 @@ import numpy as np
 import files
 from scipy.spatial.transform import Rotation
 import matplotlib.pyplot as plt
+from flask import Flask, render_template, request
 
+app = Flask(__name__)
+
+result = {
+    "quat" : [0,0,0,1],
+    "error" : "0.0",
+    "completed" : False
+}
 
 def array_permutations(array):
     N = array.size
@@ -46,14 +54,14 @@ def objective(quat, envPlanesLables, envPlanesPoints, mrPlanes):
     return sumOfDistances
 
 
-def main():
-    envLabels = np.genfromtxt(files.ENV,dtype=str)[:,0]
-    print(envLabels)
-    envPoints = np.genfromtxt(files.ENV)[:,1:]
-    print(envPoints)
+def find_rot(envLabels, envPoints, mrLabels, mrPoints):
+    # envLabels = np.genfromtxt(files.ENV,dtype=str)[:,0]
+    # print(envLabels)
+    # envPoints = np.genfromtxt(files.ENV)[:,1:]
+    # print(envPoints)
 
-    mrLabels = np.genfromtxt(files.MR,dtype=str)[:,0]
-    mrPoints = np.genfromtxt(files.MR)[:,1:]
+    # mrLabels = np.genfromtxt(files.MR,dtype=str)[:,0]
+    # mrPoints = np.genfromtxt(files.MR)[:,1:]
 
 
     #check that we received all the planes
@@ -106,8 +114,31 @@ def main():
     plt.scatter(centeredMr[:, 0], centeredMr[:, 1])
     plt.show()
 
+def json_to_array(pointList):
+    labels = []
+    points = []
+    for point in pointList:
+        labels.append(point["label"])
+        points.append(point["point"])
+    return np.array(labels), np.array(points)
+
+@app.get("/result")
+def getResult():
+    return result
+
+@app.put("/result")
+def putResult():
+    if request.is_json:
+        unityPoints = request.get_json()["points"]
+        result["quat"] = find_rot(json_to_array(unityPoints["env"]), json_to_array(unityPoints["mr"]))
+        result["completed"] = True
+        return result, 200
+    return {"error": "Request must be JSON"}, 415
+
+
+
 if __name__ == "__main__":
-    main()
+    app.run(port=5005,debug = True)
 
 
 

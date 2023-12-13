@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Proyecto26;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -76,9 +77,9 @@ public class RecognizeEnv : MonoBehaviour
             env.transform.position += shouldPos - isPos;
 
             //maybeTODO keep env in upright position
-            
-            
-            
+
+            //RestClient.Put("127.0.0.1:5005/result",);
+
             //calibrator.GetComponent<MRCalibration>().Calibrate(getRealCorners(targetPlane)); //only works correctly if the vertices are passed in the same order as when virtual reference was created
         }
         align = false;
@@ -233,5 +234,12 @@ public class RecognizeEnv : MonoBehaviour
     private int symmDiff(int soll, int ist)
     {
         return Math.Max(0, soll - Math.Abs(soll - ist));
+    }
+    
+    [Serializable]
+    private struct JsonUnityPoint
+    {
+        public String label;
+        public float[] point;
     }
 }
