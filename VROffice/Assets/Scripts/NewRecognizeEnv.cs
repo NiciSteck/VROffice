@@ -6,7 +6,7 @@ using Proyecto26;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class RecognizeEnv : MonoBehaviour
+public class NewRecognizeEnv : MonoBehaviour
 {
     private List<EnvModel> envList = new List<EnvModel>();
 
@@ -37,108 +37,78 @@ public class RecognizeEnv : MonoBehaviour
     {
         if (align)
         {
-            GameObject env = recognize().gameObject;
-            if (!env.activeSelf)
+            EnvModel env = recognize();
+            GameObject envObject = env.gameObject;
+            if (!envObject.activeSelf)
             {
-                env.SetActive(true);
+                envObject.SetActive(true);
             }
-            GameObject mainPlane = null;
-            
-            //get the assigned main plane of the environment to calibrate with it
-            foreach (Transform planeObject in env.transform)
+
+            //get Planes of the Envirnment
+            List<GameObject> envPlanes = new List<GameObject>();
+            foreach (ContainerModel container in env.containers)
             {
-                if (planeObject.gameObject.name.Contains("main"))
-                {
-                    mainPlane = planeObject.GetChild(0).gameObject;
-                }
+                envPlanes.Add(container.gameObject);
             }
-            
+
+            //get Planes form MrMapper
+            List<GameObject> mrPlanes = new List<GameObject>();
             GameObject targetPlane = debugPlane;
-            //get the target plane from MRMapper
             foreach (Transform mrPlaneTrans in mrMapper.transform)
             {
-                GameObject mrPlane = mrPlaneTrans.gameObject;
-                String mainName = mainPlane.transform.parent.gameObject.name.Split()[0];
-                if (mrPlane.name.Contains(mainName))
+                GameObject mrChild = mrPlaneTrans.gameObject;
+                if (mrChild.name.Contains("plane"))
                 {
-                    targetPlane = mrPlane;
-                    break;
+                    mrPlanes.Add(mrChild);
                 }
             }
-            
-            Vector3 shouldPos = targetPlane.transform.position;
-            Quaternion shouldRot = getRealRotation(targetPlane);
-            
-            Quaternion isRot = getRealRotation(mainPlane);
-            Quaternion rotDiff = shouldRot * Quaternion.Inverse(isRot);
-            env.transform.rotation = rotDiff * env.transform.rotation;
-            
-            Vector3 isPos = mainPlane.transform.position;
-            env.transform.position += shouldPos - isPos;
 
+            String restMessage = "{" + jsonifyPlanes(envPlanes, false) + "," + jsonifyPlanes(mrPlanes, true) + "}";
+            
+            RestClient.Put("127.0.0.1:5005/result",restMessage);
+            
+            
             //maybeTODO keep env in upright position
-
-            //RestClient.Put("127.0.0.1:5005/result",);
-
-            //calibrator.GetComponent<MRCalibration>().Calibrate(getRealCorners(targetPlane)); //only works correctly if the vertices are passed in the same order as when virtual reference was created
         }
         align = false;
     }
-    
-    //finds the Rotation of a plane if it had the coordinate system up = surface normal and forward = long edge.
-    //(Only gives the right result if the same corner is closest to the camera)
-    private Quaternion getRealRotation(GameObject plane)
-    {
-        Vector3[] vertices = plane.GetComponent<MeshFilter>().sharedMesh.vertices;
 
-        Vector3[] corners = getRealCorners(plane);
-        
-        Vector3 cornersMean = (corners[0] + corners[1] + corners[2] + corners[3]) / 4;
-        
-        Vector3 shortSide = getShortSide(corners);
-        Vector3 longSide = getLongSide(corners);
-
-        Vector3 normal = Vector3.Cross(longSide,shortSide);
-        return Quaternion.LookRotation(longSide,normal);
-        
-    }
-    
-    /// <param name="corners"> the corners of a plane sorted by the Vector3Comparer </param>
-    private Vector3 getShortSide(Vector3[] corners)
+    private String jsonifyPlanes(List<GameObject> planes, bool fromMrMapper)
     {
-        Vector3 zero = corners[0];
-        Vector3[] fromZero = { corners[0] - corners[1],corners[0] - corners[2],corners[0] - corners[3]};
-        Vector3 shortest = fromZero[0];
-        foreach (Vector3 curr in fromZero)
+        String jsonString;
+        if (fromMrMapper)
         {
-            if (curr.magnitude < shortest.magnitude)
+            jsonString = "{\"mr\":[";
+        }
+        else
+        {
+            jsonString = "{\"env\":[";
+        }
+        foreach (GameObject plane in planes)
+        {
+            Vector3[] corners;
+            if (fromMrMapper)
             {
-                shortest = curr;
+                corners = getRealCorners(plane);
+            }
+            else
+            {
+                corners = getRealCorners(plane.transform.GetChild(0).gameObject);
+            }
+            foreach (Vector3 corner in corners)
+            {
+                float[] cornerFloat = new float[3];
+                cornerFloat[0] = corner.x;
+                cornerFloat[1] = corner.y;
+                cornerFloat[2] = corner.z;
+                jsonString += JsonUtility.ToJson(new JsonUnityPoint
+                    {label = plane.name.Split(" ")[0], point = cornerFloat})+",";
             }
         }
-        return shortest;
+        jsonString += jsonString.Substring(0,jsonString.Length-1) + "]}";
+        return jsonString;
     }
     
-    /// <param name="corners"> the corners of a plane sorted by the Vector3Comparer </param>
-    private Vector3 getLongSide(Vector3[] corners)
-    {
-        Vector3 zero = corners[0];
-        Vector3[] fromZero = { corners[0] - corners[1],corners[0] - corners[2],corners[0] - corners[3]};
-        Vector3 middle = fromZero[0];
-        for (int i = 0; i < 3; i++)
-        {
-            if (fromZero[i].magnitude > fromZero[(i + 1) % 3].magnitude &&
-                fromZero[i].magnitude < fromZero[(i + 2) % 3].magnitude
-                ||
-                fromZero[i].magnitude < fromZero[(i + 1) % 3].magnitude &&
-                fromZero[i].magnitude > fromZero[(i + 2) % 3].magnitude)
-            {
-                middle = fromZero[i];
-            }
-        }
-        return middle;
-    }
-
     private Vector3[] getRealCorners(GameObject plane)
     {
         Vector3[] vertices = plane.GetComponent<MeshFilter>().sharedMesh.vertices;
@@ -234,5 +204,12 @@ public class RecognizeEnv : MonoBehaviour
     private int symmDiff(int soll, int ist)
     {
         return Math.Max(0, soll - Math.Abs(soll - ist));
+    }
+    
+    [Serializable]
+    private struct JsonUnityPoint
+    {
+        public String label;
+        public float[] point;
     }
 }

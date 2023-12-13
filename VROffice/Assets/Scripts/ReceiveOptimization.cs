@@ -42,15 +42,8 @@ public class ReceiveOptimization : MonoBehaviour
             for (int i = 0; i < arr.Length; i++)
             {
                 jsonString += JsonUtility.ToJson(arr[i]);
-                if (i == arr.Length - 1)
-                {
-                    jsonString += "]}";
-                }
-                else
-                {
-                    jsonString += ",";
-                }
             }
+            jsonString += jsonString.Substring(0,jsonString.Length-1) + "]}";
             Debug.Log(jsonString);
             
             Debug.Log(JsonUtility.ToJson(arr[0]));
