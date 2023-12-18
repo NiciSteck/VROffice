@@ -14,12 +14,6 @@ public class NewRecognizeEnv : MonoBehaviour
     private GameObject mrMapper;
 
     [SerializeField] private bool align = false;
-
-    [SerializeField] 
-    private GameObject calibrator;
-
-    [SerializeField]
-    private GameObject debugPlane;
     
     // Start is called before the first frame update
     void Start()
@@ -38,12 +32,7 @@ public class NewRecognizeEnv : MonoBehaviour
         if (align)
         {
             EnvModel env = recognize();
-            GameObject envObject = env.gameObject;
-            if (!envObject.activeSelf)
-            {
-                envObject.SetActive(true);
-            }
-
+            
             //get Planes of the Envirnment
             List<GameObject> envPlanes = new List<GameObject>();
             foreach (ContainerModel container in env.containers)
@@ -52,8 +41,9 @@ public class NewRecognizeEnv : MonoBehaviour
             }
 
             //get Planes form MrMapper
+            //List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes;
+            
             List<GameObject> mrPlanes = new List<GameObject>();
-            GameObject targetPlane = debugPlane;
             foreach (Transform mrPlaneTrans in mrMapper.transform)
             {
                 GameObject mrChild = mrPlaneTrans.gameObject;
@@ -63,14 +53,26 @@ public class NewRecognizeEnv : MonoBehaviour
                 }
             }
 
+            RestClient.Get("http://127.0.0.1:5005/result").Then(response => Debug.Log("Get: " + response.Text));
+            
             String restMessage = "{" + jsonifyPlanes(envPlanes, false) + "," + jsonifyPlanes(mrPlanes, true) + "}";
+            RestClient.Put("http://127.0.0.1:5005/result",restMessage).Then(response => Debug.Log("Put: " + response.Text));
+
+            Vector3 centroidMr = Vector3.zero;
+            foreach (GameObject plane in mrPlanes)
+            {
+                centroidMr += plane.transform.position;
+            }
+
+            centroidMr /= mrPlanes.Count;
+            Debug.Log(env.gameObject.transform.position);
+            Debug.Log(centroidMr);
+            env.gameObject.transform.position = centroidMr;
             
-            RestClient.Put("127.0.0.1:5005/result",restMessage);
-            
-            
-            //maybeTODO keep env in upright position
+            Debug.Log(restMessage);
+            align = false;
+            StartCoroutine(WaitForOptimization(env));
         }
-        align = false;
     }
 
     private String jsonifyPlanes(List<GameObject> planes, bool fromMrMapper)
@@ -78,23 +80,16 @@ public class NewRecognizeEnv : MonoBehaviour
         String jsonString;
         if (fromMrMapper)
         {
-            jsonString = "{\"mr\":[";
+            jsonString = "\"mr\":[";
         }
         else
         {
-            jsonString = "{\"env\":[";
+            jsonString = "\"env\":[";
         }
         foreach (GameObject plane in planes)
         {
             Vector3[] corners;
-            if (fromMrMapper)
-            {
-                corners = getRealCorners(plane);
-            }
-            else
-            {
-                corners = getRealCorners(plane.transform.GetChild(0).gameObject);
-            }
+            corners = getRealCorners(fromMrMapper ? plane : plane.transform.GetChild(0).gameObject);
             foreach (Vector3 corner in corners)
             {
                 float[] cornerFloat = new float[3];
@@ -105,7 +100,7 @@ public class NewRecognizeEnv : MonoBehaviour
                     {label = plane.name.Split(" ")[0], point = cornerFloat})+",";
             }
         }
-        jsonString += jsonString.Substring(0,jsonString.Length-1) + "]}";
+        jsonString = jsonString.Substring(0,jsonString.Length-1) + "]";
         return jsonString;
     }
     
@@ -161,8 +156,16 @@ public class NewRecognizeEnv : MonoBehaviour
     //returns the most similar Environment to the Surfaces recognized by MRMapper
     public EnvModel recognize()
     {
-        List<GameObject> planes = mrMapper.GetComponent<ReceivePlanes>().planes;
-        List<GameObject> objects = mrMapper.GetComponent<ReceiveObjects>().icpObjects;
+        //List<GameObject> planes = mrMapper.GetComponent<ReceivePlanes>().planes;
+        List<GameObject> planes = new List<GameObject>();
+        foreach (Transform mrPlaneTrans in mrMapper.transform)
+        {
+            GameObject mrChild = mrPlaneTrans.gameObject;
+            if (mrChild.name.Contains("plane"))
+            {
+                planes.Add(mrChild);
+            }
+        }
         
 
         //assign a similarity score to each environment
@@ -204,6 +207,46 @@ public class NewRecognizeEnv : MonoBehaviour
     private int symmDiff(int soll, int ist)
     {
         return Math.Max(0, soll - Math.Abs(soll - ist));
+    }
+
+    IEnumerator WaitForOptimization(EnvModel env)
+    {
+        int wait = 1;
+        OptimizationResult result = new OptimizationResult{quat = new float[]{0.0f,0.0f,0.0f,1.0f},error = 0.0f,completed = false};
+        yield return new WaitForSeconds(wait);
+        int count = 0;
+        while (!result.completed&&count<10)
+        {
+            RestClient.Get("http://127.0.0.1:5005/result").Then(response =>
+                result = JsonUtility.FromJson<OptimizationResult>(response.Text));
+            count++;
+            yield return new WaitForSeconds(wait);
+        }
+        GameObject envObject = env.gameObject;
+        
+        Quaternion optimizedRot = new Quaternion(result.quat[0], result.quat[1], result.quat[2], result.quat[3]);
+        Debug.Log(optimizedRot);
+        Debug.Log(Matrix4x4.Rotate(optimizedRot));
+        envObject.transform.localRotation = optimizedRot * envObject.transform.localRotation;
+        
+        if (!envObject.activeSelf)
+        {
+            envObject.SetActive(true);
+        }
+
+        if (count == 10 && !result.completed)
+        {
+            Debug.Log("Optimization timed out after 10 seconds");
+        }
+        RestClient.Put("http://127.0.0.1:5005/reset", "{}");
+    }
+
+    [Serializable]
+    private struct OptimizationResult
+    {
+        public float[] quat;
+        public float error;
+        public bool completed;
     }
     
     [Serializable]

@@ -41,9 +41,9 @@ public class ReceiveOptimization : MonoBehaviour
             String jsonString = "{\"points\":[";
             for (int i = 0; i < arr.Length; i++)
             {
-                jsonString += JsonUtility.ToJson(arr[i]);
+                jsonString += JsonUtility.ToJson(arr[i]) + ",";
             }
-            jsonString += jsonString.Substring(0,jsonString.Length-1) + "]}";
+            jsonString = jsonString.Substring(0,jsonString.Length-1) + "]}";
             Debug.Log(jsonString);
             
             Debug.Log(JsonUtility.ToJson(arr[0]));
@@ -52,16 +52,15 @@ public class ReceiveOptimization : MonoBehaviour
             Debug.Log("Utility: " + JsonUtility.ToJson(arr));
             
             
-            
             RestClient.Put("http://127.0.0.1:5005/test2", jsonString).Then(response =>
             {
                 EditorUtility.DisplayDialog("Response", response.Text, "Ok");
             });
             
-            RestClient.Put("http://127.0.0.1:5005//test2", JsonHelper.ArrayToJsonString(arr)).Then(response =>
-            {
-                EditorUtility.DisplayDialog("Response", response.Text, "Ok");
-            });
+            // RestClient.Put("http://127.0.0.1:5005//test2", JsonHelper.ArrayToJsonString(arr)).Then(response =>
+            // {
+            //     EditorUtility.DisplayDialog("Response", response.Text, "Ok");
+            // });
         }
 
         go = false;

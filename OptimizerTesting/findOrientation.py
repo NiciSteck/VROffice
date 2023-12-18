@@ -1,12 +1,13 @@
 import math
 import itertools
 from tqdm import tqdm
-from scipy.optimize import basinhopping
+from scipy.optimize import basinhopping,minimize
 import numpy as np
 import files
 from scipy.spatial.transform import Rotation
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request
+
 
 app = Flask(__name__)
 
@@ -25,13 +26,28 @@ def find_init_rotation(sourceLabels, sourcePoints, targteLabels, targetPoints):
     bestRes = None
     bestRot = None
     bestPerm = None
+
+    debugCount = 0
+
     for labelsPermuted, perm in tqdm(array_permutations(sourceLabels), total=math.factorial(sourceLabels.size)):     
         if np.array_equal(targteLabels, labelsPermuted):
             rot, res = Rotation.align_vectors(sourcePoints[list(perm)], targetPoints)
+
+            aplliedPoints = rot.apply(sourcePoints[list(perm)])
+            fig = plt.figure(figsize=(6,6))
+            ax = fig.add_subplot(projection='3d')
+            jitter = 0.005 # make points visible
+            ax.scatter(aplliedPoints[:,0] + jitter, aplliedPoints[:,1] + jitter, aplliedPoints[:,2] + jitter)
+            ax.scatter(targetPoints[:, 0], targetPoints[:, 1], targetPoints[:, 2])
+            plt.savefig("init%s.png"%(debugCount))
+
             if bestRes is None or res < bestRes:
                 bestRes = res
                 bestRot = rot
                 bestPerm = perm
+
+            debugCount += 1
+
     return bestRot, bestRes, bestPerm        
 
 def get_planewise_centroids(labels, points):
@@ -63,7 +79,6 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     # mrLabels = np.genfromtxt(files.MR,dtype=str)[:,0]
     # mrPoints = np.genfromtxt(files.MR)[:,1:]
 
-
     #check that we received all the planes
     assert envLabels.size % 4 == 0
     assert mrLabels.size % 4 == 0
@@ -73,46 +88,55 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
 
     mean_env = np.mean(envPoints, axis=0)
     mean_mr = np.mean(mrPoints, axis=0)
+    print(mean_env)
+    print(mean_mr)
 
     centeredEnv = envPoints - mean_env
     centeredMr = mrPoints - mean_mr
-    centeredEnvInit = centeredEnv
 
+    initRot = [0,0,0,1]
     if(envLabels.size/4 >2):
         envCentroidsLabels, envCentroids = get_planewise_centroids(envLabels, centeredEnv)
 
         mrCentroidsLabels, mrCentroids = get_planewise_centroids(mrLabels, centeredMr)
 
-        initRot, initRes, initPerm = find_init_rotation(envCentroidsLabels, envCentroids, mrCentroidsLabels, mrCentroids)
+        scipyRot, initRes, initPerm = find_init_rotation(envCentroidsLabels, envCentroids, mrCentroidsLabels, mrCentroids)
 
         print(initRes)
-        from_x = initRot.apply(envCentroids)[:, 0]
-        from_y = initRot.apply(envCentroids)[:, 1]
-        plt.figure(figsize=(6,6))
-        jitter = 0.005 # make points visible
-        plt.scatter(from_x + jitter, from_y + jitter)
-        plt.scatter(mrCentroids[:, 0], mrCentroids[:, 1])
-        plt.show()
 
-        centeredEnvInit = initRot.apply(centeredEnv)
-        finalRotation *= initRot
+        initRot = scipyRot.as_quat()
 
-    solution = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (envLabels,centeredEnvInit,list(zip(mrLabels,centeredMr)))}, disp=True)
+
+    solution = basinhopping(objective, initRot, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, disp=True, niter_success=10)
+    # solution = minimize(objective, initRot, args=(envLabels,centeredEnv,list(zip(mrLabels,centeredMr))), options={'disp': True})
 
     sol = solution.x
     print("({}f, {}f, {}f, {}f)".format(sol[0],sol[1],sol[2],sol[3]))
+    r = Rotation.from_quat(sol)
 
+    rom_x = r.apply(centeredEnv)[:, 0]
+    rom_y = r.apply(centeredEnv)[:, 1]
+    rom_z = r.apply(centeredEnv)[:, 2]
+    fig = plt.figure(figsize=(12,12))
 
-    finalRotation *= Rotation.from_quat(sol)
-    angles = finalRotation.as_euler("xyz",degrees=True)
-    print(angles)
-    from_x = finalRotation.apply(centeredEnv)[:, 0]
-    from_y = finalRotation.apply(centeredEnv)[:, 1]
-    plt.figure(figsize=(6,6))
+    ax = fig.add_subplot(projection='3d')
+    jitter = 0.005 # make points visible
+    plt.scatter(rom_x + jitter, rom_y + jitter, rom_z + jitter)
+    plt.scatter(centeredMr[:, 0], centeredMr[:, 1], centeredMr[:, 2])
+    plt.savefig("final.png")
+
+    from_x = r.apply(centeredEnv)[:, 0]
+    from_y = r.apply(centeredEnv)[:, 1]
+    plt.figure(figsize=(12,12))
     jitter = 0.005 # make points visible
     plt.scatter(from_x + jitter, from_y + jitter)
     plt.scatter(centeredMr[:, 0], centeredMr[:, 1])
-    plt.show()
+    plt.savefig("final2d.png")
+
+    print(solution.fun)
+    print(solution.x)
+    normalizedQuat = r.as_quat()
+    return normalizedQuat, solution.fun 
 
 def json_to_array(pointList):
     labels = []
@@ -126,11 +150,20 @@ def json_to_array(pointList):
 def getResult():
     return result
 
+@app.put("/reset")
+def putReset():
+    result["completed"] = False
+    return result, 200
+
 @app.put("/result")
 def putResult():
     if request.is_json:
-        unityPoints = request.get_json()["points"]
-        result["quat"] = find_rot(json_to_array(unityPoints["env"]), json_to_array(unityPoints["mr"]))
+        unityPoints = request.get_json()
+        envLabels, envPoints = json_to_array(unityPoints["env"])
+        mrLabels, mrPoints = json_to_array(unityPoints["mr"])
+        quat, error = find_rot(envLabels, envPoints, mrLabels, mrPoints)
+        result["quat"] = quat.tolist()
+        result["error"] = error
         result["completed"] = True
         return result, 200
     return {"error": "Request must be JSON"}, 415
