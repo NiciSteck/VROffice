@@ -111,7 +111,7 @@ def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSource
     if indexArraySource.size < indexArrayTarget.size:
         #MrMapper recognized too many planes with currLabel
         for labelsPermuted, pointsPermuted, labelPerm in array_permutations(currTargetLabels,currTargetPoints):
-            res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, np.append(permutationArraySource,indexArraySource),np.append(permutationArrayTarget,indexArrayTarget[labelPerm[:indexArraySource.size]]))
+            res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource+indexArraySource.tolist(),permutationArrayTarget + indexArrayTarget[labelPerm[:indexArraySource.size]].tolist())
             if bestRes is None or res  < bestRes:
                 bestRes = res
                 bestRot = rot
@@ -121,7 +121,7 @@ def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSource
     elif indexArraySource.size > indexArrayTarget.size:
         #MrMapper didnt recognize all planes with currLabel
         for labelsPermuted, pointsPermuted, labelPerm in array_permutations(currSourceLabels,currSourcePoints):
-            res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, np.append(permutationArraySource,indexArraySource[labelPerm[:indexArrayTarget.size]]),np.append(permutationArrayTarget,indexArrayTarget))
+            res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource + indexArraySource[labelPerm[:indexArrayTarget.size]].tolist(),permutationArrayTarget+indexArrayTarget.tolist())
             if bestRes is None or res  < bestRes:
                 bestRes = res
                 bestRot = rot
@@ -129,7 +129,7 @@ def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSource
                 bestPermTarget = permTarget
     else:
         #MrMapper recognized the same number of planes with currLabel
-        res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, np.append(permutationArraySource,indexArraySource),np.append(permutationArrayTarget,indexArrayTarget))
+        res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource + indexArraySource.tolist(),permutationArrayTarget+indexArrayTarget.tolist())
         if bestRes is None or res  < bestRes:
             bestRes = res
             bestRot = rot
@@ -193,11 +193,11 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     envCentroidsLabels, envCentroids = get_planewise_centroids(envLabels, centeredEnv)
     mrCentroidsLabels, mrCentroids = get_planewise_centroids(mrLabels, centeredMr)
 
-    initRot, initRes, initPermEnv, initPermMr = recursive_init_rotation(envCentroidsLabels, envCentroidsLabels, envCentroids, mrCentroidsLabels, mrCentroids, np.empty(0,dtype=int), np.empty(0,dtype=int))
+    initRes, initRot, initPermEnv, initPermMr = recursive_init_rotation(envCentroidsLabels, envCentroidsLabels, envCentroids, mrCentroidsLabels, mrCentroids, [], [])
     print(initRes)
 
-    centeredEnv = np.vstack(np.vsplit(centeredEnv, centeredEnv[:,0].size/4)[initPermEnv])
-    centeredMr = np.vstack(np.vsplit(centeredMr, centeredMr[:,0].size/4)[initPermMr])
+    centeredMr = np.vstack(np.array(np.vsplit(centeredMr, centeredMr[:,0].size/4))[initPermMr])
+    centeredEnv = np.vstack(np.array(np.vsplit(centeredEnv, centeredEnv[:,0].size/4))[initPermEnv])
 
     solution = basinhopping(objective, initRot, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, disp=True, niter_success=10)
     # solution = minimize(objective, initRot, args=(envLabels,centeredEnv,list(zip(mrLabels,centeredMr))), options={'disp': True})

@@ -31,47 +31,10 @@ public class NewRecognizeEnv : MonoBehaviour
     {
         if (align)
         {
-            EnvModel env = recognize();
+            List<EnvModel> probableEnvs = recognize();
             
-            //get Planes of the Envirnment
-            List<GameObject> envPlanes = new List<GameObject>();
-            foreach (ContainerModel container in env.containers)
-            {
-                envPlanes.Add(container.gameObject);
-            }
-
-            //get Planes form MrMapper
-            //List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes;
-            
-            List<GameObject> mrPlanes = new List<GameObject>();
-            foreach (Transform mrPlaneTrans in mrMapper.transform)
-            {
-                GameObject mrChild = mrPlaneTrans.gameObject;
-                if (mrChild.name.Contains("plane"))
-                {
-                    mrPlanes.Add(mrChild);
-                }
-            }
-
-            RestClient.Get("http://127.0.0.1:5005/result").Then(response => Debug.Log("Get: " + response.Text));
-            
-            String restMessage = "{" + jsonifyPlanes(envPlanes, false) + "," + jsonifyPlanes(mrPlanes, true) + "}";
-            RestClient.Put("http://127.0.0.1:5005/result",restMessage).Then(response => Debug.Log("Put: " + response.Text));
-
-            Vector3 centroidMr = Vector3.zero;
-            foreach (GameObject plane in mrPlanes)
-            {
-                centroidMr += plane.transform.position;
-            }
-
-            centroidMr /= mrPlanes.Count;
-            Debug.Log(env.gameObject.transform.position);
-            Debug.Log(centroidMr);
-            env.gameObject.transform.position = centroidMr;
-            
-            Debug.Log(restMessage);
             align = false;
-            StartCoroutine(WaitForOptimization(env));
+            StartCoroutine(WaitForOptimization(probableEnvs));
         }
     }
 
@@ -154,7 +117,7 @@ public class NewRecognizeEnv : MonoBehaviour
     }
     
     //returns the most similar Environment to the Surfaces recognized by MRMapper
-    public EnvModel recognize()
+    public List<EnvModel> recognize()
     {
         //List<GameObject> planes = mrMapper.GetComponent<ReceivePlanes>().planes;
         List<GameObject> planes = new List<GameObject>();
@@ -200,7 +163,7 @@ public class NewRecognizeEnv : MonoBehaviour
         }
         
         envList.Sort();
-        return envList[0];
+        return envList;
     }
 
     //returns input number if both inputs are the same. If they are unequal it deducts the absolute difference between the two with a minimum of 0
@@ -209,34 +172,80 @@ public class NewRecognizeEnv : MonoBehaviour
         return Math.Max(0, soll - Math.Abs(soll - ist));
     }
 
-    IEnumerator WaitForOptimization(EnvModel env)
+    IEnumerator WaitForOptimization(List<EnvModel> probableEnvs)
     {
-        float wait = 0.1f;
-        OptimizationResult result = new OptimizationResult{quat = new float[]{0.0f,0.0f,0.0f,1.0f},error = 0.0f,completed = false};
-        yield return new WaitForSeconds(wait);
-        int count = 0;
-        while (!result.completed&&count<10)
+        //get Planes form MrMapper
+        //List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes; or
+        List<GameObject> mrPlanes = new List<GameObject>();
+        foreach (Transform mrPlaneTrans in mrMapper.transform)
         {
-            RestClient.Get("http://127.0.0.1:5005/result").Then(response =>
-                result = JsonUtility.FromJson<OptimizationResult>(response.Text));
-            count++;
-            yield return new WaitForSeconds(wait);
-        }
-        GameObject envObject = env.gameObject;
-        
-        Quaternion optimizedRot = new Quaternion(result.quat[0], result.quat[1], result.quat[2], result.quat[3]);
-        envObject.transform.localRotation = optimizedRot * envObject.transform.localRotation;
-        
-        if (!envObject.activeSelf)
-        {
-            envObject.SetActive(true);
+            GameObject mrChild = mrPlaneTrans.gameObject;
+            if (mrChild.name.Contains("plane"))
+            {
+                mrPlanes.Add(mrChild);
+            }
         }
 
-        if (count == 10 && !result.completed)
+        String jsonMr = jsonifyPlanes(mrPlanes, true);
+
+        float wait = 0.1f;
+        int timeout = 50;
+        OptimizationResult bestResult = new OptimizationResult{quat = new float[]{0.0f,0.0f,0.0f,1.0f},error = float.MaxValue,completed = false};
+        GameObject bestEnvObject = null;
+
+        foreach (EnvModel env in probableEnvs)
         {
-            Debug.Log("Optimization timed out after 10 seconds");
+            //get Planes of the Envirnment
+            List<GameObject> envPlanes = new List<GameObject>();
+            foreach (ContainerModel container in env.containers)
+            {
+                envPlanes.Add(container.gameObject);
+            }
+            GameObject envObject = env.gameObject;
+            
+            RestClient.Get("http://127.0.0.1:5005/result").Then(response => Debug.Log("Get: " + response.Text)); //debug
+            
+            String restMessage = "{" + jsonifyPlanes(envPlanes, false) + "," + jsonMr + "}";
+            RestClient.Put("http://127.0.0.1:5005/result",restMessage).Then(response => Debug.Log("Put: " + response.Text));
+            
+            OptimizationResult result = new OptimizationResult{quat = new float[]{0.0f,0.0f,0.0f,1.0f},error = float.MaxValue,completed = false};
+            int count = 0;
+            while (!result.completed&&count<timeout)
+            {
+                RestClient.Get("http://127.0.0.1:5005/result").Then(response =>
+                    result = JsonUtility.FromJson<OptimizationResult>(response.Text));
+                count++;
+                yield return new WaitForSeconds(wait);
+            }
+            
+            if (!result.completed)
+            { 
+                Debug.Log("Optimization timed out after 10 seconds");
+            } else if (result.error < bestResult.error)
+            {
+                bestResult = result;
+                bestEnvObject = envObject;
+            }
+            RestClient.Put("http://127.0.0.1:5005/reset", "{}");
         }
-        RestClient.Put("http://127.0.0.1:5005/reset", "{}");
+        
+        
+        
+        
+        Quaternion optimizedRot = new Quaternion(bestResult.quat[0], bestResult.quat[1], bestResult.quat[2], bestResult.quat[3]);
+        bestEnvObject.transform.localRotation = optimizedRot * bestEnvObject.transform.localRotation;
+        
+        if (!bestEnvObject.activeSelf)
+        {
+            bestEnvObject.SetActive(true);
+        }
+        Vector3 centroidMr = Vector3.zero;
+        foreach (GameObject plane in mrPlanes)
+        {
+            centroidMr += plane.transform.position;
+        }
+        centroidMr /= mrPlanes.Count;
+        bestEnvObject.transform.position = centroidMr;
     }
 
     [Serializable]
