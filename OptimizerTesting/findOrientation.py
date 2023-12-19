@@ -111,7 +111,8 @@ def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSource
     if indexArraySource.size < indexArrayTarget.size:
         #MrMapper recognized too many planes with currLabel
         for labelsPermuted, pointsPermuted, labelPerm in array_permutations(currTargetLabels,currTargetPoints):
-            res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource+indexArraySource.tolist(),permutationArrayTarget + indexArrayTarget[labelPerm[:indexArraySource.size]].tolist())
+            cutPerm = np.array(labelPerm)[:indexArraySource.size]
+            res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource+indexArraySource.tolist(),permutationArrayTarget + indexArrayTarget[cutPerm].tolist())
             if bestRes is None or res  < bestRes:
                 bestRes = res
                 bestRot = rot
@@ -121,7 +122,8 @@ def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSource
     elif indexArraySource.size > indexArrayTarget.size:
         #MrMapper didnt recognize all planes with currLabel
         for labelsPermuted, pointsPermuted, labelPerm in array_permutations(currSourceLabels,currSourcePoints):
-            res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource + indexArraySource[labelPerm[:indexArrayTarget.size]].tolist(),permutationArrayTarget+indexArrayTarget.tolist())
+            cutPerm = np.array(labelPerm)[:indexArrayTarget.size]
+            res, rot, permSource, permTarget = recursive_init_rotation(np.delete(leftoverLabels,indexArrayLeftover), originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource + indexArraySource[cutPerm].tolist(),permutationArrayTarget+indexArrayTarget.tolist())
             if bestRes is None or res  < bestRes:
                 bestRes = res
                 bestRot = rot
@@ -168,12 +170,13 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     # mrPoints = np.genfromtxt(files.MR)[:,1:]
 
     #sanitize MrPlanes
-    mrLabelsSanitized = mrLabels
-    mrPointsSanitized = mrPoints
+    mrLabelsSanitized = np.copy(mrLabels)
+    mrPointsSanitized = np.copy(mrPoints)
     for i in range(mrLabels.size):
         if mrLabels[i] not in envLabels:
-            mrLabelsSanitized = np.delete(mrLabelsSanitized,i,axis=0)
-            mrPointsSanitized = np.delete(mrPointsSanitized,i,axis=0)
+            indexOfNoise = np.where(mrLabelsSanitized == mrLabels[i])[0]
+            mrLabelsSanitized = np.delete(mrLabelsSanitized,indexOfNoise,axis=0)
+            mrPointsSanitized = np.delete(mrPointsSanitized,indexOfNoise,axis=0)
     mrLabels = mrLabelsSanitized
     mrPoints = mrPointsSanitized
 

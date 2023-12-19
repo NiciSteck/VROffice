@@ -119,7 +119,7 @@ public class NewRecognizeEnv : MonoBehaviour
     //returns the most similar Environment to the Surfaces recognized by MRMapper
     public List<EnvModel> recognize()
     {
-        //List<GameObject> planes = mrMapper.GetComponent<ReceivePlanes>().planes;
+        //List<GameObject> planes = mrMapper.GetComponent<ReceivePlanes>().planes; only works with the real mrmapper
         List<GameObject> planes = new List<GameObject>();
         foreach (Transform mrPlaneTrans in mrMapper.transform)
         {
@@ -129,15 +129,14 @@ public class NewRecognizeEnv : MonoBehaviour
                 planes.Add(mrChild);
             }
         }
-        
 
+        List<EnvModel> probableEnvs = new List<EnvModel>();
+        int allowedNoise = 1;
         //assign a similarity score to each environment
         foreach (EnvModel envModel in envList)
         {
             Transform env = envModel.gameObject.transform;
-            envModel.similarity += symmDiff(planes.Count,env.childCount); //increases similarity by the symmDiff of the number of planes
-
-            //increases similarity by symmDiff of the number of planes that have the same label
+            bool probable = true;
             foreach (String label in Labels.classes)
             {
                 int nrMapper = 0;
@@ -152,18 +151,18 @@ public class NewRecognizeEnv : MonoBehaviour
                     nrEnv += model.gameObject.name.Contains(label) ? 1 : 0;
                 }
 
-                envModel.similarity += symmDiff(nrMapper, nrEnv);
+                if (Math.Abs(nrMapper - nrEnv) > allowedNoise)
+                {
+                    probable = false;
+                }
             }
-            
-            //surface area
-            
-            //angles/normals
-            
-            //distance between planes
+
+            if (probable)
+            {
+                probableEnvs.Add(envModel);
+            }
         }
-        
-        envList.Sort();
-        return envList;
+        return probableEnvs;
     }
 
     //returns input number if both inputs are the same. If they are unequal it deducts the absolute difference between the two with a minimum of 0
@@ -175,7 +174,7 @@ public class NewRecognizeEnv : MonoBehaviour
     IEnumerator WaitForOptimization(List<EnvModel> probableEnvs)
     {
         //get Planes form MrMapper
-        //List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes; or
+        //List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes; only works with the real mrmapper
         List<GameObject> mrPlanes = new List<GameObject>();
         foreach (Transform mrPlaneTrans in mrMapper.transform)
         {
@@ -203,7 +202,7 @@ public class NewRecognizeEnv : MonoBehaviour
             }
             GameObject envObject = env.gameObject;
             
-            RestClient.Get("http://127.0.0.1:5005/result").Then(response => Debug.Log("Get: " + response.Text)); //debug
+            //RestClient.Get("http://127.0.0.1:5005/result").Then(response => Debug.Log("Get: " + response.Text)); //debug
             
             String restMessage = "{" + jsonifyPlanes(envPlanes, false) + "," + jsonMr + "}";
             RestClient.Put("http://127.0.0.1:5005/result",restMessage).Then(response => Debug.Log("Put: " + response.Text));
