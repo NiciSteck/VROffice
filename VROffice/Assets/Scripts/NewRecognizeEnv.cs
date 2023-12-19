@@ -211,7 +211,7 @@ public class NewRecognizeEnv : MonoBehaviour
 
     IEnumerator WaitForOptimization(EnvModel env)
     {
-        int wait = 1;
+        float wait = 0.1f;
         OptimizationResult result = new OptimizationResult{quat = new float[]{0.0f,0.0f,0.0f,1.0f},error = 0.0f,completed = false};
         yield return new WaitForSeconds(wait);
         int count = 0;
@@ -225,8 +225,6 @@ public class NewRecognizeEnv : MonoBehaviour
         GameObject envObject = env.gameObject;
         
         Quaternion optimizedRot = new Quaternion(result.quat[0], result.quat[1], result.quat[2], result.quat[3]);
-        Debug.Log(optimizedRot);
-        Debug.Log(Matrix4x4.Rotate(optimizedRot));
         envObject.transform.localRotation = optimizedRot * envObject.transform.localRotation;
         
         if (!envObject.activeSelf)
