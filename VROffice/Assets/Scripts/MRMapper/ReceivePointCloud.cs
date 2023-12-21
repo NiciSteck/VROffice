@@ -23,9 +23,12 @@ public class ReceivePointCloud : RosReceiver
     string log_tag = "Pcd Receiver";
     
     public float pointSize = 10f;
-    GameObject pointCloud; 
+    GameObject pointCloud;
 
-
+    private bool m_init = true;
+    private RealignSystems _realignSystems;
+    [SerializeField] private GameObject m_OVRRig;
+    
     public void Start()
     {
         // setup point cloud game object 
@@ -41,11 +44,23 @@ public class ReceivePointCloud : RosReceiver
 
 
         Setup(port, log_tag, ProcessReceivedBytes);
+        
+        _realignSystems = GetComponent<RealignSystems>();
     }
 
 
     private void ProcessReceivedBytes(byte[] data)
     {
+        //truns the entire MRMapper Object such that the unity and ROS coordinate systems are aligned
+        if (m_init)
+        {
+            Transform oTrans = m_OVRRig.transform;
+            transform.position = oTrans.position + oTrans.up*_realignSystems.dist_fromQuestToRealSense.y + oTrans.forward*_realignSystems.dist_fromQuestToRealSense.z + oTrans.right*_realignSystems.dist_fromQuestToRealSense.x; //idk why offset is too big
+            transform.rotation = oTrans.rotation * Quaternion.Euler(_realignSystems.rot_fromQuestToRealSense);
+             
+            m_init = false;
+        }
+        
         // deserialize points and mesh 
         List<Vector3> points = new List<Vector3>();
         List<Color> colors = new List<Color>();

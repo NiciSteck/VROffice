@@ -22,12 +22,10 @@ public class ReceiveOdom : RosReceiver
     int port = 5002;
     string log_tag = "Odom Receiver";
     [SerializeField] private GameObject realSense;
-    [SerializeField] private GameObject m_OVRRig;
-    [SerializeField] private bool m_init = true;
 
-    [SerializeField] private int msgsReset = 100;
+    [SerializeField] private int msgsReset = 10;
     private int msgsReceived = 0;
-    private AlignCameras alignCameras;
+    private RealignSystems _realignSystems;
 
     private List<String> log = new List<string>();
     private int logIndex = 0;
@@ -35,7 +33,7 @@ public class ReceiveOdom : RosReceiver
     public void Start()
     {
         Setup(port, log_tag, ProcessReceivedBytes);
-        alignCameras = GetComponent<AlignCameras>();
+        _realignSystems = GetComponent<RealignSystems>();
     }
     
     void OnDestroy()
@@ -62,15 +60,6 @@ public class ReceiveOdom : RosReceiver
         log.Add(logIndex + ": " + cameraPos.ToString("F5") + ", " + cameraRot.ToString("F5"));
         logIndex++;
         
-         //truns the entire MRMapper Object such that the unity and ROS coordinate systems are aligned
-         if (m_init)
-         {
-             Transform oTrans = m_OVRRig.transform;
-             transform.position = oTrans.position + oTrans.up*alignCameras.dist_fromQuestToRealSense.y + oTrans.forward*alignCameras.dist_fromQuestToRealSense.z + oTrans.right*alignCameras.dist_fromQuestToRealSense.x; //idk why offset is too big
-             transform.rotation = oTrans.rotation * Quaternion.Euler(alignCameras.rot_fromQuestToRealSense);
-             
-             m_init = false;
-         }
 
         //update RealSense transform
         if (cameraPos != Vector3.zero)
@@ -81,11 +70,12 @@ public class ReceiveOdom : RosReceiver
         
         //call to AlignCameras to reset position
         msgsReceived = (msgsReceived + 1) % msgsReset;
+        Debug.Log(msgsReceived);
         if (msgsReceived == 0)
         {
-            if (alignCameras != null)
+            if (_realignSystems != null)
             {
-                alignCameras.updateCameras();
+                _realignSystems.updateCameras();
             }
         }
     }

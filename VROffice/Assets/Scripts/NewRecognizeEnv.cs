@@ -14,6 +14,7 @@ public class NewRecognizeEnv : MonoBehaviour
     private GameObject mrMapper;
 
     [SerializeField] private bool align = false;
+    [SerializeField] private bool recenter = false;
     
     // Start is called before the first frame update
     void Start()
@@ -29,12 +30,21 @@ public class NewRecognizeEnv : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (align)
+        if (align||recenter)
         {
-            List<EnvModel> probableEnvs = recognize();
+            List<EnvModel> probableEnvs = new List<EnvModel>();
+            if (recenter)
+            {
+                probableEnvs = new List<EnvModel>(transform.GetComponentsInChildren<EnvModel>(false));
+            }
+            else
+            {
+                probableEnvs = recognize();
+            }
             
             align = false;
-            StartCoroutine(WaitForOptimization(probableEnvs));
+            recenter = false;
+            StartCoroutine(ExecuteOptimization(probableEnvs));
         }
     }
 
@@ -171,7 +181,7 @@ public class NewRecognizeEnv : MonoBehaviour
         return Math.Max(0, soll - Math.Abs(soll - ist));
     }
 
-    IEnumerator WaitForOptimization(List<EnvModel> probableEnvs)
+    public IEnumerator ExecuteOptimization(List<EnvModel> probableEnvs)
     {
         //get Planes form MrMapper
         //List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes; only works with the real mrmapper

@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 /*
  * This script recenters the Oculus Quest when it is too far from the camera position. 
  */
-public class AlignCameras : MonoBehaviour
+public class RealignSystems : MonoBehaviour
 {
     GameObject realSense;
     GameObject oculus;
@@ -19,7 +19,7 @@ public class AlignCameras : MonoBehaviour
 
     private Quaternion realSenseToOculusRot;
 
-
+    [SerializeField] private GameObject environments;
     void Start()
     {
         realSense = GameObject.Find("RealSense");
@@ -47,8 +47,8 @@ public class AlignCameras : MonoBehaviour
 
         float absPosDiff = posDiff.magnitude;
         float absRotDiff = 2f * Mathf.Rad2Deg * Mathf.Acos(Mathf.Abs(rotDiff.w));
-
-
+        
+        
         float tPos = 0.05f;
         float tRot = 10f;
 
@@ -60,8 +60,21 @@ public class AlignCameras : MonoBehaviour
             isPos = realSense.transform.position;
             posDiff = shouldPos - isPos;
             transform.position = posDiff + transform.position;
-            Debug.Log("Resetting Oculus offset"); 
+            Debug.Log("Resetting Oculus offset");
+
+            
+            List<EnvModel> currentEnv = new List<EnvModel>(environments.GetComponentsInChildren<EnvModel>(false));
+            // NewRecognizeEnv alignEnvScript = environments.GetComponent<NewRecognizeEnv>();
+            // StartCoroutine(alignEnvScript.ExecuteOptimization(currentEnv));
+            
+            //or just this because reusing mr mapper later might not be optimal because the plane detections might get noisy
+            //somehow doesnt work correctly yet
+            environments.transform.rotation = rotDiff * environments.transform.rotation;
+            environments.transform.position = posDiff + environments.transform.position;
         }
+        
+        
+        
 
   
     }

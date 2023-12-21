@@ -5,7 +5,7 @@ using Proyecto26;
 using UnityEditor;
 using UnityEngine;
 
-public class ReceiveOptimization : MonoBehaviour
+public class RestTest : MonoBehaviour
 {
     public bool go = false;
     void Update()
