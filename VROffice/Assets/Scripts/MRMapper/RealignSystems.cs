@@ -67,10 +67,12 @@ public class RealignSystems : MonoBehaviour
             // NewRecognizeEnv alignEnvScript = environments.GetComponent<NewRecognizeEnv>();
             // StartCoroutine(alignEnvScript.ExecuteOptimization(currentEnv));
             
-            //or just this because reusing mr mapper later might not be optimal because the plane detections might get noisy
-            //somehow doesnt work correctly yet
-            environments.transform.rotation = rotDiff * environments.transform.rotation;
-            environments.transform.position = posDiff + environments.transform.position;
+            //or just this because reusing mr mapper planes in optimization later might not be optimal because the plane detections might get noisy
+            // foreach (EnvModel env in currentEnv)
+            // {
+            //     env.transform.rotation = rotDiff * env.transform.rotation;
+            //     env.transform.position = posDiff + env.transform.position;
+            // }
         }
         
         

@@ -181,6 +181,20 @@ public class NewRecognizeEnv : MonoBehaviour
         return Math.Max(0, soll - Math.Abs(soll - ist));
     }
 
+    public void centerChildrenOnPoint(Transform parent, Vector3 center)
+    {
+        List<Transform> children = parent.Cast<Transform>().ToList();
+        foreach (Transform child in children)
+        {
+            child.parent = null;
+        }
+        parent.position = center;
+        foreach (Transform child in children)
+        {
+            child.parent = parent;
+        }
+    }
+
     public IEnumerator ExecuteOptimization(List<EnvModel> probableEnvs)
     {
         //get Planes form MrMapper
@@ -242,27 +256,26 @@ public class NewRecognizeEnv : MonoBehaviour
         
         
         Quaternion optimizedRot = new Quaternion(bestResult.quat[0], bestResult.quat[1], bestResult.quat[2], bestResult.quat[3]);
+        Vector3 envCenterPoint = new Vector3(bestResult.envCenter[0], bestResult.envCenter[1], bestResult.envCenter[2]);
+        Vector3 mrCenterPoint = new Vector3(bestResult.mrCenter[0], bestResult.mrCenter[1], bestResult.mrCenter[2]);
+        centerChildrenOnPoint(bestEnvObject.transform, envCenterPoint);
         bestEnvObject.transform.localRotation = optimizedRot * bestEnvObject.transform.localRotation;
         
         if (!bestEnvObject.activeSelf)
         {
             bestEnvObject.SetActive(true);
         }
-        Vector3 centroidMr = Vector3.zero;
-        foreach (GameObject plane in mrPlanes)
-        {
-            centroidMr += plane.transform.position;
-        }
-        centroidMr /= mrPlanes.Count;
-        bestEnvObject.transform.position = centroidMr;
+        bestEnvObject.transform.position = mrCenterPoint;
     }
-
+    
     [Serializable]
     private struct OptimizationResult
     {
         public float[] quat;
         public float error;
         public bool completed;
+        public float[] envCenter;
+        public float[] mrCenter;
     }
     
     [Serializable]

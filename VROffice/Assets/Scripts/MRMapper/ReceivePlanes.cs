@@ -104,8 +104,8 @@ public class ReceivePlanes : RosReceiver
         Mesh rectangleMesh = new Mesh();
         rectangleMesh.vertices = corners;
         rectangleMesh.triangles = new int[] { 0, 2, 3, 1, 0, 3, 2, 0, 3, 0, 1, 3 }; // 4 triangles that form a closed rectangle 
-        rectangleMesh.RecalculateNormals();
-        rectangleMesh.RecalculateBounds();
+        //rectangleMesh.RecalculateNormals();
+        //rectangleMesh.RecalculateBounds();
         meshFilter.sharedMesh = rectangleMesh;
 
         return plane; 

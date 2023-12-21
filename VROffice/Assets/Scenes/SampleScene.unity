@@ -1546,7 +1546,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &790956217
 Transform:
   m_ObjectHideFlags: 0
@@ -3216,7 +3216,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1844040703
 Transform:
   m_ObjectHideFlags: 0
@@ -3533,7 +3533,7 @@ MonoBehaviour:
   m_containerInstantiator: {fileID: 1629021144649572557}
   m_containers: []
   m_obstacles: []
-  m_env: {fileID: 790956217}
+  m_env: {fileID: 0}
   m_clearEnv: 0
   m_useEnv: 0
   m_definingNewElements: 0

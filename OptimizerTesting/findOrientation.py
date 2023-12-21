@@ -14,13 +14,18 @@ app = Flask(__name__)
 result = {
     "quat" : [0,0,0,1],
     "error" : "0.0",
-    "completed" : False
+    "completed" : False,
+    "envCenter" : [0,0,0],
+    "mrCenter" : [0,0,0]
 }
 
 def array_permutations(labels,points):
     N = labels.size
     for permute in itertools.permutations(range(N)):
         yield labels[list(permute)],points[list(permute)], permute
+
+def getCenteredPoints(points):
+    return points - np.mean(points, axis=0)
 
 def find_init_rotation_old(sourceLabels, sourcePoints, targteLabels, targetPoints):
     bestRes = None
@@ -89,9 +94,13 @@ def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSource
         print(permutationArrayTarget)
         sourceLabels = originalSourceLabels[permutationArraySource]
         sourcePoints = originalSourcePoints[permutationArraySource]
+        centeredSourcePoints = sourcePoints - np.mean(sourcePoints, axis=0)
+
         targteLabels = originalTargetLabels[permutationArrayTarget]
-        targetPoints = originalTargetPoints[permutationArrayTarget]
-        sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (sourceLabels,sourcePoints,list(zip(targteLabels,targetPoints)))}, disp=True, niter_success=5)
+        targetPoints = getCenteredPoints(originalTargetPoints[permutationArrayTarget])
+        centeredTargetPoints = targetPoints - np.mean(targetPoints, axis=0)
+
+        sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (sourceLabels,centeredSourcePoints,list(zip(targteLabels,centeredTargetPoints)))}, disp=True, niter_success=5)
         return sol.fun, sol.x, permutationArraySource, permutationArrayTarget
     
     bestRes = None
@@ -184,23 +193,21 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     assert envLabels.size % 4 == 0
     assert mrLabels.size % 4 == 0
 
-    mean_env = np.mean(envPoints, axis=0)
-    mean_mr = np.mean(mrPoints, axis=0)
-
-    centeredEnv = envPoints - mean_env
-    centeredMr = mrPoints - mean_mr
-
     initRot = [0,0,0,1]
 
-
-    envCentroidsLabels, envCentroids = get_planewise_centroids(envLabels, centeredEnv)
-    mrCentroidsLabels, mrCentroids = get_planewise_centroids(mrLabels, centeredMr)
+    envCentroidsLabels, envCentroids = get_planewise_centroids(envLabels, envPoints)
+    mrCentroidsLabels, mrCentroids = get_planewise_centroids(mrLabels, mrPoints)
 
     initRes, initRot, initPermEnv, initPermMr = recursive_init_rotation(envCentroidsLabels, envCentroidsLabels, envCentroids, mrCentroidsLabels, mrCentroids, [], [])
     print(initRes)
 
-    centeredMr = np.vstack(np.array(np.vsplit(centeredMr, centeredMr[:,0].size/4))[initPermMr])
-    centeredEnv = np.vstack(np.array(np.vsplit(centeredEnv, centeredEnv[:,0].size/4))[initPermEnv])
+    mrPoints = np.vstack(np.array(np.vsplit(mrPoints, mrPoints[:,0].size/4))[initPermMr])
+    mrMean = np.mean(mrPoints, axis=0)
+    centeredMr = mrPoints - mrMean
+
+    envPoints = np.vstack(np.array(np.vsplit(envPoints, envPoints[:,0].size/4))[initPermEnv])
+    envMean = np.mean(envPoints, axis=0)
+    centeredEnv = envPoints - envMean
 
     solution = basinhopping(objective, initRot, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, disp=True, niter_success=10)
     # solution = minimize(objective, initRot, args=(envLabels,centeredEnv,list(zip(mrLabels,centeredMr))), options={'disp': True})
@@ -222,7 +229,7 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     normalizedQuat = r.as_quat()
     print(normalizedQuat)
 
-    return normalizedQuat, solution.fun 
+    return normalizedQuat, solution.fun , envMean, mrMean
 
 def json_to_array(pointList):
     labels = []
@@ -247,10 +254,12 @@ def putResult():
         unityPoints = request.get_json()
         envLabels, envPoints = json_to_array(unityPoints["env"])
         mrLabels, mrPoints = json_to_array(unityPoints["mr"])
-        quat, error = find_rot(envLabels, envPoints, mrLabels, mrPoints)
+        quat, error, envMean, mrMean = find_rot(envLabels, envPoints, mrLabels, mrPoints)
         result["quat"] = quat.tolist()
         result["error"] = error
         result["completed"] = True
+        result["envCenter"] = envMean.tolist()
+        result["mrCenter"] = mrMean.tolist()
         return result, 200
     return {"error": "Request must be JSON"}, 415
 
