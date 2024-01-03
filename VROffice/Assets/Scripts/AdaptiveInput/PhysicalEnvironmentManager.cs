@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PhysicalEnvironmentManager : MonoBehaviour
 {
@@ -56,7 +58,8 @@ public class PhysicalEnvironmentManager : MonoBehaviour
     {
         get { return m_obstacles; }
     }
-
+    [NonSerialized] 
+    public Vector3 mrPoint;
     [Header("Controls")]
     [SerializeField]
     private Transform m_env;
@@ -72,10 +75,11 @@ public class PhysicalEnvironmentManager : MonoBehaviour
     private bool m_useEnv;
     private bool m_useEnvPrev;
     [SerializeField]
-    private bool m_definingNewElements;
+    public bool m_definingNewElements;
     private bool m_definingNewElementsPrev; 
     public EnvElement m_definingElement;
-    
+    [SerializeField] 
+    public bool mrDefinePoint;
 
     public void disable()
     {
@@ -396,9 +400,23 @@ public class PhysicalEnvironmentManager : MonoBehaviour
                 + m_controllerOffset.x * (rotation * Vector3.right)
                 + m_controllerOffset.y * (rotation * Vector3.up)
                 + m_controllerOffset.z * (rotation * Vector3.forward);
-            updatePoint(position, rotation);
-            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, m_controller))
+            if (mrDefinePoint)
+            {
+                updatePoint(mrPoint, rotation);
+            }
+            else
+            {
+                updatePoint(position, rotation);
+            }
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, m_controller) && !mrDefinePoint)
+            {
                 setPoint(position);
+            }else if (mrDefinePoint)
+            {
+                setPoint(mrPoint);
+                mrDefinePoint = false;
+            }
+                
         }
 
         // Update instantiator color 

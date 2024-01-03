@@ -39,6 +39,10 @@ public class NewRecognizeEnv : MonoBehaviour
             }
             else
             {
+                foreach (Transform child in transform)
+                {
+                    child.gameObject.SetActive(false);
+                }
                 probableEnvs = recognize();
             }
             
@@ -227,7 +231,7 @@ public class NewRecognizeEnv : MonoBehaviour
             GameObject envObject = env.gameObject;
             
             //RestClient.Get("http://127.0.0.1:5005/result").Then(response => Debug.Log("Get: " + response.Text)); //debug
-            
+            Debug.Log(env.gameObject.name);
             String restMessage = "{" + jsonifyPlanes(envPlanes, false) + "," + jsonMr + "}";
             RestClient.Put("http://127.0.0.1:5005/result",restMessage).Then(response => Debug.Log("Put: " + response.Text));
             

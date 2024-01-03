@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 /*
  * This script recenters the Oculus Quest when it is too far from the camera position. 
  */
-public class RealignSystems : MonoBehaviour
+public class AlignSystems : MonoBehaviour
 {
     GameObject realSense;
     GameObject oculus;

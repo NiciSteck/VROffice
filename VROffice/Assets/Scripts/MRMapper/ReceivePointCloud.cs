@@ -26,7 +26,7 @@ public class ReceivePointCloud : RosReceiver
     GameObject pointCloud;
 
     private bool m_init = true;
-    private RealignSystems _realignSystems;
+    private AlignSystems _alignSystems;
     [SerializeField] private GameObject m_OVRRig;
     
     public void Start()
@@ -45,7 +45,7 @@ public class ReceivePointCloud : RosReceiver
 
         Setup(port, log_tag, ProcessReceivedBytes);
         
-        _realignSystems = GetComponent<RealignSystems>();
+        _alignSystems = GetComponent<AlignSystems>();
     }
 
 
@@ -55,8 +55,8 @@ public class ReceivePointCloud : RosReceiver
         if (m_init)
         {
             Transform oTrans = m_OVRRig.transform;
-            transform.position = oTrans.position + oTrans.up*_realignSystems.dist_fromQuestToRealSense.y + oTrans.forward*_realignSystems.dist_fromQuestToRealSense.z + oTrans.right*_realignSystems.dist_fromQuestToRealSense.x; //idk why offset is too big
-            transform.rotation = oTrans.rotation * Quaternion.Euler(_realignSystems.rot_fromQuestToRealSense);
+            transform.position = oTrans.position + oTrans.up*_alignSystems.dist_fromQuestToRealSense.y + oTrans.forward*_alignSystems.dist_fromQuestToRealSense.z + oTrans.right*_alignSystems.dist_fromQuestToRealSense.x; //idk why offset is too big
+            transform.rotation = oTrans.rotation * Quaternion.Euler(_alignSystems.rot_fromQuestToRealSense);
              
             m_init = false;
         }

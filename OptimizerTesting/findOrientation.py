@@ -82,7 +82,7 @@ def find_init_rotation(sourceLabels, sourcePoints, targteLabels, targetPoints):
                     bestPerm = perm
     else:       
         #MrMapper recognized the same number of planes
-        sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (sourceLabels,sourcePoints,list(zip(targteLabels,targetPoints)))}, disp=True, niter_success=5)
+        sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (sourceLabels,sourcePoints,list(zip(targteLabels,targetPoints)))}, niter_success=5)
 
 
     return bestRes, bestRot, bestPerm
@@ -90,8 +90,8 @@ def find_init_rotation(sourceLabels, sourcePoints, targteLabels, targetPoints):
 def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource, permutationArrayTarget):
     #base case
     if leftoverLabels.size == 0:
-        print(permutationArraySource)
-        print(permutationArrayTarget)
+        # print(permutationArraySource)
+        # print(permutationArrayTarget)
         sourceLabels = originalSourceLabels[permutationArraySource]
         sourcePoints = originalSourcePoints[permutationArraySource]
         centeredSourcePoints = sourcePoints - np.mean(sourcePoints, axis=0)
@@ -100,7 +100,7 @@ def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSource
         targetPoints = getCenteredPoints(originalTargetPoints[permutationArrayTarget])
         centeredTargetPoints = targetPoints - np.mean(targetPoints, axis=0)
 
-        sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (sourceLabels,centeredSourcePoints,list(zip(targteLabels,centeredTargetPoints)))}, disp=True, niter_success=5)
+        sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (sourceLabels,centeredSourcePoints,list(zip(targteLabels,centeredTargetPoints)))}, niter_success=5)
         return sol.fun, sol.x, permutationArraySource, permutationArrayTarget
     
     bestRes = None
@@ -200,6 +200,8 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
 
     initRes, initRot, initPermEnv, initPermMr = recursive_init_rotation(envCentroidsLabels, envCentroidsLabels, envCentroids, mrCentroidsLabels, mrCentroids, [], [])
     print(initRes)
+    print(initPermEnv)
+    print(initPermMr)
 
     mrPoints = np.vstack(np.array(np.vsplit(mrPoints, mrPoints[:,0].size/4))[initPermMr])
     mrMean = np.mean(mrPoints, axis=0)
@@ -209,7 +211,7 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     envMean = np.mean(envPoints, axis=0)
     centeredEnv = envPoints - envMean
 
-    solution = basinhopping(objective, initRot, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, disp=True, niter_success=10)
+    solution = basinhopping(objective, initRot, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, niter_success=10)
     # solution = minimize(objective, initRot, args=(envLabels,centeredEnv,list(zip(mrLabels,centeredMr))), options={'disp': True})
 
     sol = solution.x

@@ -25,7 +25,7 @@ public class ReceiveOdom : RosReceiver
 
     [SerializeField] private int msgsReset = 10;
     private int msgsReceived = 0;
-    private RealignSystems _realignSystems;
+    private AlignSystems _alignSystems;
 
     private List<String> log = new List<string>();
     private int logIndex = 0;
@@ -33,7 +33,7 @@ public class ReceiveOdom : RosReceiver
     public void Start()
     {
         Setup(port, log_tag, ProcessReceivedBytes);
-        _realignSystems = GetComponent<RealignSystems>();
+        _alignSystems = GetComponent<AlignSystems>();
     }
     
     void OnDestroy()
@@ -73,9 +73,9 @@ public class ReceiveOdom : RosReceiver
         Debug.Log(msgsReceived);
         if (msgsReceived == 0)
         {
-            if (_realignSystems != null)
+            if (_alignSystems != null)
             {
-                _realignSystems.updateCameras();
+                _alignSystems.updateCameras();
             }
         }
     }
