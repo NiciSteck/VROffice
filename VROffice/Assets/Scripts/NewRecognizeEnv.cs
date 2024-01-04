@@ -266,11 +266,11 @@ public class NewRecognizeEnv : MonoBehaviour
         centerChildrenOnPoint(bestEnvObject.transform, envCenterPoint);
         bestEnvObject.transform.localRotation = optimizedRot * bestEnvObject.transform.localRotation;
         
-        if (!bestEnvObject.activeSelf)
-        {
-            bestEnvObject.SetActive(true);
-        }
         bestEnvObject.transform.position = mrCenterPoint;
+
+        PhysicalEnvironmentManager manager = transform.parent.GetComponent<PhysicalEnvironmentManager>();
+        manager.Env = bestEnvObject.transform;
+        manager.useEnvironment();
     }
     
     [Serializable]

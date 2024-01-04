@@ -17,14 +17,6 @@ public class BuildEnv : MonoBehaviour
     void Start()
     {
         mrMapper = transform.gameObject;
-        
-        //is here because this way of saving ens as prefabs only works if the project isnt built
-        string[] files = AssetDatabase.FindAssets("t:prefab", new string[] {"Assets/Resources/Env"});
-        foreach (string prefab in files)
-        {
-            GameObject savedEnv = Resources.Load<GameObject>("Env/" + prefab);
-            Instantiate(savedEnv);
-        }
     }
 
     // Update is called once per frame

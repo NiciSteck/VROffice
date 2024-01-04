@@ -16,7 +16,7 @@ public class SerializeEnvs : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //dataDirPath = Application.persistentDataPath;
+        //dataDirPath = Application.persistentDataPath; //the clean place to store data, but not included in git repo
         loadEnvs();
     }
 
