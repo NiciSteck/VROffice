@@ -32,7 +32,7 @@ public class BuildEnv : MonoBehaviour
     {
         if (build && !buildPrev)
         {
-            GameObject newEnv = new GameObject("Env-NewEnv");
+            GameObject newEnv = new GameObject("Env-NewAutomaticEnv");
             newEnv.AddComponent<EnvModel>();
             newEnv.transform.SetParent(envCollection);
             StartCoroutine(setPoints(newEnv.transform));
@@ -69,8 +69,6 @@ public class BuildEnv : MonoBehaviour
         pEnvManager.Env = null;
         pEnvManager.m_definingNewElements = false;
         build = false;
-        
-        saveAsPrefab(env.gameObject);
     }
 
     private void renameSurface(Transform env, string name)
@@ -109,12 +107,4 @@ public class BuildEnv : MonoBehaviour
             child.parent = parent;
         }
     }
-
-    private void saveAsPrefab(GameObject env)
-    {
-        string localPath = "Assets/Resources/Env" + env.name + ".prefab";
-        localPath = AssetDatabase.GenerateUniqueAssetPath(localPath);
-        GameObject prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(env, localPath, InteractionMode.AutomatedAction);
-    }
-    
 }
