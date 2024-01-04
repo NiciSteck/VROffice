@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEditor;
 
 public class BuildEnv : MonoBehaviour
 {
     public PhysicalEnvironmentManager pEnvManager;
     private GameObject mrMapper;
+    [SerializeField] private Transform envCollection;
 
     public bool build;
     private bool buildPrev = false;
@@ -15,6 +17,14 @@ public class BuildEnv : MonoBehaviour
     void Start()
     {
         mrMapper = transform.gameObject;
+        
+        //is here because this way of saving ens as prefabs only works if the project isnt built
+        string[] files = AssetDatabase.FindAssets("t:prefab", new string[] {"Assets/Resources/Env"});
+        foreach (string prefab in files)
+        {
+            GameObject savedEnv = Resources.Load<GameObject>("Env/" + prefab);
+            Instantiate(savedEnv);
+        }
     }
 
     // Update is called once per frame
@@ -22,7 +32,9 @@ public class BuildEnv : MonoBehaviour
     {
         if (build && !buildPrev)
         {
-            GameObject newEnv = new GameObject("NewEnv");
+            GameObject newEnv = new GameObject("Env-NewEnv");
+            newEnv.AddComponent<EnvModel>();
+            newEnv.transform.SetParent(envCollection);
             StartCoroutine(setPoints(newEnv.transform));
         }
         buildPrev = build;
@@ -32,7 +44,10 @@ public class BuildEnv : MonoBehaviour
     {
         pEnvManager.Env = env.transform;
         pEnvManager.m_definingNewElements = true;
+        
+        EnvModel model = env.GetComponent<EnvModel>();
         List<GameObject> planes = mrMapper.GetComponent<ReceivePlanes>().planes;
+        
         foreach (GameObject plane in planes)
         {
             Mesh mesh = plane.GetComponent<MeshFilter>().mesh;
@@ -48,10 +63,14 @@ public class BuildEnv : MonoBehaviour
             }
             renameSurface(env,plane.name);
         }
+        updateEnvModel(model);
         centerOnChildren(env);
+        
         pEnvManager.Env = null;
         pEnvManager.m_definingNewElements = false;
         build = false;
+        
+        saveAsPrefab(env.gameObject);
     }
 
     private void renameSurface(Transform env, string name)
@@ -63,6 +82,15 @@ public class BuildEnv : MonoBehaviour
                 child.name = name;
                 break;
             }
+        }
+    }
+
+    private void updateEnvModel(EnvModel model)
+    {
+        List<ContainerModel> containers = model.containers;
+        foreach (Transform child in model.gameObject.transform)
+        {
+            containers.Add(child.GetComponent<ContainerModel>());
         }
     }
     
@@ -80,6 +108,13 @@ public class BuildEnv : MonoBehaviour
         {
             child.parent = parent;
         }
+    }
+
+    private void saveAsPrefab(GameObject env)
+    {
+        string localPath = "Assets/Resources/Env" + env.name + ".prefab";
+        localPath = AssetDatabase.GenerateUniqueAssetPath(localPath);
+        GameObject prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(env, localPath, InteractionMode.AutomatedAction);
     }
     
 }
