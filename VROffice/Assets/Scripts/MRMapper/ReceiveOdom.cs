@@ -23,7 +23,7 @@ public class ReceiveOdom : RosReceiver
     string log_tag = "Odom Receiver";
     [SerializeField] private GameObject realSense;
 
-    [SerializeField] private int msgsReset = 10;
+    [SerializeField] private int msgsReset = 1;
     private int msgsReceived = 0;
     private AlignSystems _alignSystems;
 
@@ -70,7 +70,7 @@ public class ReceiveOdom : RosReceiver
         
         //call to AlignCameras to reset position
         msgsReceived = (msgsReceived + 1) % msgsReset;
-        Debug.Log(msgsReceived);
+        //Debug.Log(msgsReceived);
         if (msgsReceived == 0)
         {
             if (_alignSystems != null)

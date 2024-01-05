@@ -55,7 +55,6 @@ public class BuildEnv : MonoBehaviour
             }
             renameSurface(env,plane.name);
         }
-        updateEnvModel(model);
         centerOnChildren(env);
         
         pEnvManager.Env = null;
@@ -72,15 +71,6 @@ public class BuildEnv : MonoBehaviour
                 child.name = name;
                 break;
             }
-        }
-    }
-
-    private void updateEnvModel(EnvModel model)
-    {
-        List<ContainerModel> containers = model.containers;
-        foreach (Transform child in model.gameObject.transform)
-        {
-            containers.Add(child.GetComponent<ContainerModel>());
         }
     }
     

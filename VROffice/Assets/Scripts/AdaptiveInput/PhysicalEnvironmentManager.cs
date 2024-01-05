@@ -388,10 +388,15 @@ public class PhysicalEnvironmentManager : MonoBehaviour
         if (m_definingNewElements && !m_definingNewElementsPrev)
         {
             reset();
-            GameObject newEnv = new GameObject("Env-NewManualEnv");
-            newEnv.AddComponent<EnvModel>();
-            newEnv.transform.SetParent(transform.GetChild(0));
-            m_env = newEnv.transform;
+            if (!mrDefinePoint)
+            {
+                GameObject newEnv = new GameObject("Env-NewManualEnv");
+                newEnv.AddComponent<EnvModel>();
+                newEnv.transform.SetParent(transform.GetChild(0));
+                m_env = newEnv.transform;
+                useEnvironment();
+            }
+            
         } 
         if (!m_definingNewElements && m_definingNewElementsPrev)
         {

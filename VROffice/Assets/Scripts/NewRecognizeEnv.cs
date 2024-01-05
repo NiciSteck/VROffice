@@ -9,8 +9,6 @@ using UnityEngine.Assertions;
 
 public class NewRecognizeEnv : MonoBehaviour
 {
-    private List<EnvModel> envList = new List<EnvModel>();
-
     [SerializeField]
     private GameObject mrMapper;
 
@@ -20,12 +18,6 @@ public class NewRecognizeEnv : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        foreach (Transform environment in transform)
-        {
-            EnvModel env = environment.GetComponent<EnvModel>();
-            if (env != null)
-                envList.Add(env);
-        }
     }
 
     // Update is called once per frame
@@ -143,6 +135,14 @@ public class NewRecognizeEnv : MonoBehaviour
             {
                 planes.Add(mrChild);
             }
+        }
+    
+        List<EnvModel> envList = new List<EnvModel>();
+        foreach (Transform environment in transform)
+        {
+            EnvModel env = environment.GetComponent<EnvModel>();
+            if (env != null)
+                envList.Add(env);
         }
 
         List<EnvModel> probableEnvs = new List<EnvModel>();
