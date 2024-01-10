@@ -5102,7 +5102,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4507dc091e6c3474f9cc60f3505f7c47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  planeMaterial: {fileID: 2100000, guid: 40378b49fd1a81b48a8dfb9ea1b7575c, type: 2}
   planes: []
+  freeze: 0
 --- !u!4 &8812845789902280051
 Transform:
   m_ObjectHideFlags: 0
@@ -5126,7 +5128,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8812845789902280045}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 781657c5fb8b4c64588c0d5920989972, type: 3}
   m_Name: 
@@ -5147,7 +5149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   realSense: {fileID: 8812845789566498073}
-  msgsReset: 10
+  msgsReset: 1
 --- !u!114 &8812845789902280056
 MonoBehaviour:
   m_ObjectHideFlags: 0

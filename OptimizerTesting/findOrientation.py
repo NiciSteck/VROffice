@@ -97,7 +97,7 @@ def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSource
         centeredSourcePoints = sourcePoints - np.mean(sourcePoints, axis=0)
 
         targteLabels = originalTargetLabels[permutationArrayTarget]
-        targetPoints = getCenteredPoints(originalTargetPoints[permutationArrayTarget])
+        targetPoints = originalTargetPoints[permutationArrayTarget]
         centeredTargetPoints = targetPoints - np.mean(targetPoints, axis=0)
 
         sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (sourceLabels,centeredSourcePoints,list(zip(targteLabels,centeredTargetPoints)))}, niter_success=5)
@@ -212,6 +212,10 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     centeredEnv = envPoints - envMean
 
     solution = basinhopping(objective, initRot, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, niter_success=10)
+    if(solution.fun > 0.1):
+        secondSolution = basinhopping(objective, solution.x, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, niter_success=10)
+        if(secondSolution.fun < solution.fun):
+            solution = secondSolution
     # solution = minimize(objective, initRot, args=(envLabels,centeredEnv,list(zip(mrLabels,centeredMr))), options={'disp': True})
 
     sol = solution.x

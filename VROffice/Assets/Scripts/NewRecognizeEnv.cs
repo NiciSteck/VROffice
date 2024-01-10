@@ -271,6 +271,8 @@ public class NewRecognizeEnv : MonoBehaviour
         PhysicalEnvironmentManager manager = transform.parent.GetComponent<PhysicalEnvironmentManager>();
         manager.Env = bestEnvObject.transform;
         manager.useEnvironment();
+        
+        mrMapper.GetComponent<ReceivePlanes>().freeze = true;
     }
     
     [Serializable]

@@ -23,9 +23,13 @@ public class ReceivePlanes : RosReceiver
 {
     int port = 5003;
     string log_tag = "Plane Receiver"; 
-
+    public Material planeMaterial;
+    
     // list to store the received planes 
     public List<GameObject> planes = new List<GameObject>();
+    public bool freeze;
+
+    
 
 
     public void Start()
@@ -52,19 +56,22 @@ public class ReceivePlanes : RosReceiver
             }
             int class_id = (int)BitConverter.ToSingle(data, offset + 48);
 
-            GameObject p = CreatePlaneGameObject(corners, class_id);
+            if (!freeze)
+            {
+                GameObject p = CreatePlaneGameObject(corners, class_id);
 
-            // update the plane list 
-            if (i < planes.Count)
-            {
-                // update existing planes
-                GameObject old_plane = planes[i];   
-                planes[i] = p;
-                Destroy(old_plane); 
-            }
-            else
-            {
-                planes.Add(p);  
+                // update the plane list 
+                if (i < planes.Count)
+                {
+                    // update existing planes
+                    GameObject old_plane = planes[i];
+                    planes[i] = p;
+                    Destroy(old_plane);
+                }
+                else
+                {
+                    planes.Add(p);
+                }
             }
         }
     }
@@ -86,7 +93,7 @@ public class ReceivePlanes : RosReceiver
         plane.AddComponent<MeshRenderer>();
         MeshRenderer meshRenderer = plane.GetComponent<MeshRenderer>();
         MeshFilter meshFilter = plane.GetComponent<MeshFilter>();
-        Material defaultMaterial = new Material(Shader.Find("VR/SpatialMapping/Wireframe"));
+        Material defaultMaterial = planeMaterial;
         meshRenderer.material = defaultMaterial;
 
         // the position of the game object should be in the middle of the mesh 
