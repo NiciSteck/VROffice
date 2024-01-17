@@ -3,7 +3,10 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Widget
+  - Surface
+  - Volume
   layers:
   - Default
   - TransparentFX
@@ -11,14 +14,14 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Interactables
+  - Surfaces
+  - Widgets
+  - Browsers
+  - Inputs
+  - Voxels
+  - Obstacles
+  - Volumes
   - 
   - 
   - 

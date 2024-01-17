@@ -14,7 +14,7 @@ public static class Constants
     public const int InteractableMask = (1 << InteractableLayer) | WidgetMask;
     public const int VoxelLayer = 11;
     public const int VolumeLayer = 13;
-
+    
     public static Dictionary<string, KeyCode> m_inputMappingKeys = new Dictionary<string, KeyCode>()
     {
         { "LEFT", KeyCode.LeftArrow },
