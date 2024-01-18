@@ -122,7 +122,6 @@ public class Widget : MonoBehaviour
         get { return m_lastController; }
     }
 
-    private GameObject userHead;
     //private float m_tDetachOptimizationThreshold = 0.5f;
 
     //[Header("Adaptation Settings")]
@@ -190,7 +189,7 @@ public class Widget : MonoBehaviour
                 if (m_app != null)
                 {
                     m_app.attach(controller);
-                    //SoundManager.Sounds.click();
+                    SoundManager.Sounds.click();
                 }
                 break; 
         }
@@ -219,10 +218,9 @@ public class Widget : MonoBehaviour
         }
         if (closestSurface != null)
         {
-            Vector3 headDirection = userHead.transform.position - closestSurface.position;
+            Vector3 headDirection = Camera.main.transform.position - closestSurface.position;
             headDirection /= headDirection.magnitude;
-            bool facingUser = Vector3.Angle(closestSurface.forward, headDirection) <
-                              Vector3.Angle(closestSurface.forward * -1, headDirection);
+            bool facingUser = normalFacingUser(closestSurface);
             
             this.transform.SetParent(closestSurface);
             m_placement = Placement.ON_SURFACE;
@@ -254,7 +252,7 @@ public class Widget : MonoBehaviour
             this.transform.Rotate(-rotAngle, 0, 0);
             */
             
-            //SoundManager.Sounds.snap();
+            SoundManager.Sounds.snap();
             m_tSnapRestricted = m_snapRestrictInteractionThreshold;
             m_controllerHistory.Clear();
             return true;
@@ -264,6 +262,14 @@ public class Widget : MonoBehaviour
         return false;
     }
 
+    private bool normalFacingUser(Transform surface)
+    {
+        Vector3 headDirection = Camera.main.transform.position - surface.position;
+        headDirection /= headDirection.magnitude;
+        return Vector3.Angle(surface.forward, headDirection) <
+                      Vector3.Angle(surface.forward * -1, headDirection);
+    }
+
     public void detachFromSurface()
     {
         Transform surface = this.transform.parent;
@@ -271,10 +277,11 @@ public class Widget : MonoBehaviour
             return; 
 
         this.transform.SetParent(VirtualEnvironmentManager.Environment.ElementsContainer);
-        m_target = this.transform.position - m_detachDistance * surface.forward;
+        bool facingUser = normalFacingUser(surface);
+        m_target = this.transform.position - m_detachDistance * (facingUser?surface.forward*-1:surface.forward);
         m_targetRotation = Quaternion.LookRotation(Camera.main.transform.forward, Vector3.up);
         m_placement = Placement.MIDAIR;
-        //SoundManager.Sounds.detach();
+        SoundManager.Sounds.detach();
     }
 
     public void trySnapToSurface()
@@ -322,7 +329,7 @@ public class Widget : MonoBehaviour
 
         if (!snapped && m_timeAttached > 0.3f)
         {
-            //SoundManager.Sounds.release();
+            SoundManager.Sounds.release();
         }
     }
 
@@ -470,7 +477,7 @@ public class Widget : MonoBehaviour
         else if (!m_controllerHistory.ContainsKey(controller))
         {
             m_controllerHistory.Add(controller, 0);
-            //SoundManager.Sounds.attach();
+            SoundManager.Sounds.attach();
         }
 
         m_controllers.Add(controller);
@@ -549,8 +556,10 @@ public class Widget : MonoBehaviour
             getControllerPose(controller, out Vector3 pos, out Quaternion rot);
             if (m_placement == Placement.ON_SURFACE)
             {
+                bool facingUser = normalFacingUser(this.transform.parent);
+                
                 pos = this.transform.parent.InverseTransformPoint(pos);
-                pos.z = VirtualEnvironmentManager.Environment.SurfaceOffset;
+                pos.z = facingUser ? VirtualEnvironmentManager.Environment.SurfaceOffset * -1 : VirtualEnvironmentManager.Environment.SurfaceOffset;
                 pos = this.transform.parent.TransformPoint(pos);
             }
             m_target = pos;
@@ -577,8 +586,10 @@ public class Widget : MonoBehaviour
                     rotation = Quaternion.Euler(euler);
                     break;
                 case Placement.ON_SURFACE:
+                    bool facingUser = normalFacingUser(this.transform.parent);
+                    
                     pos = this.transform.parent.InverseTransformPoint(pos);
-                    pos.z = VirtualEnvironmentManager.Environment.SurfaceOffset;
+                    pos.z = facingUser ? VirtualEnvironmentManager.Environment.SurfaceOffset * -1 : VirtualEnvironmentManager.Environment.SurfaceOffset;;
                     pos = this.transform.parent.TransformPoint(pos);
                     float angle = Vector3.SignedAngle(m_initBetweenControllers.normalized, betweenControllers.normalized, this.transform.parent.forward);
                     rotation = Quaternion.Euler(0, 0, angle);
@@ -695,7 +706,6 @@ public class Widget : MonoBehaviour
 
     private void Start()
     {
-        userHead = GameObject.Find("CenterEyeAnchor");
         m_target = this.transform.position;
         m_targetScale = this.transform.Find("Window").localScale;
         m_targetRotation = this.transform.rotation;

@@ -303,7 +303,8 @@ public class CursorController : Controller
         }
         pos = fromController.GetPoint(enter);
 
-        forward = surface.forward;
+        bool facingUser = normalFacingUser(surface);
+        forward = facingUser ? surface.forward*-1 : surface.forward;
         up = (m_handUp - Vector3.Dot(m_handUp, forward) * forward).normalized;
     }
 

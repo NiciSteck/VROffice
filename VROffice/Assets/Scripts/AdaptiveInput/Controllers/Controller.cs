@@ -43,6 +43,14 @@ public class Controller : MonoBehaviour
     public virtual void detach() { }
 
     public virtual void setTouching() { }
+    
+    protected bool normalFacingUser(Transform surface)
+    {
+        Vector3 headDirection = Camera.main.transform.position - surface.position;
+        headDirection /= headDirection.magnitude;
+        return Vector3.Angle(surface.forward, headDirection) <
+               Vector3.Angle(surface.forward * -1, headDirection);
+    }
 
     // Start is called before the first frame update
     void Start()

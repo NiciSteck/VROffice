@@ -178,7 +178,7 @@ public class PointController : Controller
             toSelected = m_selectedWidget.transform.parent.InverseTransformDirection(toSelected);
         else
             toSelected = m_selectedWidget.transform.InverseTransformDirection(toSelected);
-        if (toSelected.z > m_releaseThreshold)
+        if (Mathf.Abs(toSelected.z) > m_releaseThreshold)
             return true;
 
         return false; 
@@ -196,7 +196,8 @@ public class PointController : Controller
         pos.z = 0;
         pos = surface.TransformPoint(pos);
 
-        forward = surface.forward;
+        bool facingUser = normalFacingUser(surface);
+        forward = facingUser ? surface.forward*-1 : surface.forward;
         up = (m_handUp - Vector3.Dot(m_handUp, forward) * forward).normalized;
     }
 

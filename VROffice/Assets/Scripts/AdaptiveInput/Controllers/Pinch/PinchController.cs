@@ -153,7 +153,9 @@ public class PinchController : Controller
         pos = surface.InverseTransformPoint(pos);
         pos.z = 0;
         pos = surface.TransformPoint(pos);
-        forward = surface.forward;
+        
+        bool facingUser = normalFacingUser(surface);
+        forward = facingUser ? surface.forward*-1 : surface.forward;
         up = (m_handUp - Vector3.Dot(m_handUp, forward) * forward).normalized;
     }
 
