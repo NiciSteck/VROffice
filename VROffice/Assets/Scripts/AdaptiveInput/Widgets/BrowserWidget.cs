@@ -77,9 +77,9 @@ public class BrowserWidget : WidgetApplication
             m_controller = controller;
         }
 
-        // // Retarget keyboard input                                           nici
-        // if (KeyboardManager.Keyboard != null)
-        //     KeyboardManager.Keyboard.updateKeyboardOutputWidget(this);
+        // Retarget keyboard input 
+        if (KeyboardManager.Keyboard != null)
+            KeyboardManager.Keyboard.updateKeyboardOutputWidget(this);
     }
 
     public void detach()

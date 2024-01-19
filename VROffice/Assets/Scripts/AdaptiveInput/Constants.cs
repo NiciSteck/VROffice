@@ -30,12 +30,12 @@ public static class Constants
         { "SPACE", KeyCode.Space }
     };
 
-    // public static Dictionary<string, EventModifiers> m_inputMappingModifiers = new Dictionary<string, EventModifiers>()
-    // {
-    //     { "CUT", EventModifiers.Control },
-    //     { "COPY", EventModifiers.Control },
-    //     { "PASTE", EventModifiers.Control }
-    // };
+    public static Dictionary<string, EventModifiers> m_inputMappingModifiers = new Dictionary<string, EventModifiers>()
+    {
+        { "CUT", EventModifiers.Control },
+        { "COPY", EventModifiers.Control },
+        { "PASTE", EventModifiers.Control }
+    };
 
     // public static Dictionary<string, Vector3> m_taskElementLayout = new Dictionary<string, Vector3>()
     // {

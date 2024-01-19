@@ -174,14 +174,26 @@ public class PointController : Controller
             return true;
 
         Vector3 toSelected = m_selectedWidget.transform.position - this.transform.position;
-        if (m_selectedWidget.placement == Widget.Placement.ON_SURFACE) 
+        if (m_selectedWidget.placement == Widget.Placement.ON_SURFACE)
+        {
             toSelected = m_selectedWidget.transform.parent.InverseTransformDirection(toSelected);
+            bool facingUser = normalFacingUser(m_selectedWidget.transform.parent.transform);
+            toSelected = facingUser ? toSelected * -1 : toSelected;
+        }
         else
             toSelected = m_selectedWidget.transform.InverseTransformDirection(toSelected);
-        if (Mathf.Abs(toSelected.z) > m_releaseThreshold)
+        if (toSelected.z > m_releaseThreshold)
             return true;
 
         return false; 
+    }
+    
+    private bool normalFacingUser(Transform surface)
+    {
+        Vector3 headDirection = Camera.main.transform.position - surface.position;
+        headDirection /= headDirection.magnitude;
+        return Vector3.Angle(surface.forward, headDirection) <
+               Vector3.Angle(surface.forward * -1, headDirection);
     }
 
     public override bool selecting()
