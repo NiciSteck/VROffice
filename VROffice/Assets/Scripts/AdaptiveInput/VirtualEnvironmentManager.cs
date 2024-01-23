@@ -1,26 +1,32 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO; 
 
 public class VirtualEnvironmentManager : MonoBehaviour
 {
     public static VirtualEnvironmentManager Environment;
-    
+
     [SerializeField]
     private List<ElementModel> m_elements = new List<ElementModel>(); 
     public List<ElementModel> Elements
     {
         get { return m_elements; }
     }
-    
+
+    private Dictionary<ElementModel, float> m_priority = new Dictionary<ElementModel, float>();
+    public Dictionary<ElementModel, float> ElementPriority
+    {
+        get { return m_priority; }
+    }
+
     [SerializeField]
     private List<Transform> m_interactables = new List<Transform>(); 
     public List<Transform> Interactables
     {
         get { return m_interactables; }
     }
-    
+
     [Header("Surface Settings")]
     [SerializeField]
     private float m_surfaceOffset;
@@ -28,7 +34,7 @@ public class VirtualEnvironmentManager : MonoBehaviour
     {
         get { return m_surfaceOffset; }
     }
-    
+
     [Header("Element Set Controls")]
     [SerializeField]
     private Transform m_elementsContainer;
@@ -60,12 +66,91 @@ public class VirtualEnvironmentManager : MonoBehaviour
     [SerializeField]
     private bool m_inputEnabled;
     private bool m_inputEnabledPrev;
-    
-    private void Start()
+
+
+    public void setMode(bool app)
+    {
+        foreach (Transform interactable in m_interactables)
+        {
+            if (!interactable.gameObject.activeInHierarchy)
+                continue; 
+
+            Widget widget = interactable.GetComponent<Widget>(); 
+            if (widget != null)
+            {
+                if (app)
+                {
+                    widget.updateState(Widget.State.APP);
+                }
+                else
+                {
+                   widget.updateState(Widget.State.TRANSFORM);
+                }
+            }
+        }
+    }
+
+    private void setInputEnabled(bool enabled)
+    {
+        foreach (Transform interactable in m_interactables)
+        {
+            if (!interactable.gameObject.activeInHierarchy)
+                continue;
+
+            Widget widget = interactable.GetComponent<Widget>();
+            if (widget != null)
+            {
+                widget.InputEnabled = enabled;
+            }
+        }
+    }
+
+    public void addElement(ElementModel element, bool isInteractable)
+    {
+        m_elements.Add(element);
+        if (!m_priority.ContainsKey(element))
+            m_priority.Add(element, 1);
+        if (isInteractable)
+            addInteractable(element.transform);
+    }
+
+    public void clearElementSet()
+    {
+        foreach (ElementModel element in m_elements)
+        {
+            Widget widget = element.GetComponent<Widget>();
+            widget.detachFromSurface();
+        }
+        m_elements.Clear();
+        m_interactables.Clear(); 
+    }
+    public void useElementSet()
+    {
+        clearElementSet();
+        foreach (Transform element in m_elementsContainer)
+        {
+            if (element.gameObject.activeSelf)
+            {
+                m_elements.Add(element.GetComponent<ElementModel>());
+                m_interactables.Add(element);
+            }
+        }
+
+        m_useElements = false;
+    }
+
+    public void addInteractable(Transform interactable)
+    {
+        m_interactables.Add(interactable);
+    }
+
+    // Start is called before the first frame update
+    void Start()
     {
         Environment = this;
     }
-    
+
+    // Update is called once per frame
     void Update()
     {
         // Clear elements
@@ -112,75 +197,5 @@ public class VirtualEnvironmentManager : MonoBehaviour
         m_setTransformModePrev = m_setTransformMode;
         m_setApplicationMode = m_setApplicationModePrev;
         m_inputEnabledPrev = m_inputEnabled;
-    }
-    
-    public void addInteractable(Transform interactable)
-    {
-        m_interactables.Add(interactable);
-    }
-    
-    public void setMode(bool app)
-    {
-        foreach (Transform interactable in m_interactables)
-        {
-            if (!interactable.gameObject.activeInHierarchy)
-                continue; 
-
-            Widget widget = interactable.GetComponent<Widget>(); 
-            if (widget != null)
-            {
-                if (app)
-                {
-                    widget.updateState(Widget.State.APP);
-                }
-                else
-                {
-                    widget.updateState(Widget.State.TRANSFORM);
-                }
-            }
-        }
-    }
-
-    private void setInputEnabled(bool enabled)
-    {
-        foreach (Transform interactable in m_interactables)
-        {
-            if (!interactable.gameObject.activeInHierarchy)
-                continue;
-
-            Widget widget = interactable.GetComponent<Widget>();
-            if (widget != null)
-            {
-                widget.InputEnabled = enabled;
-            }
-        }
-    }
-
-    public void addElement(ElementModel element, bool isInteractable)
-    {
-        m_elements.Add(element);
-        if (isInteractable)
-            addInteractable(element.transform);
-    }
-    
-    public void clearElementSet()
-    {
-        foreach (ElementModel element in m_elements)
-        {
-            Widget widget = element.GetComponent<Widget>();
-            widget.detachFromSurface();
-        }
-        m_elements.Clear();
-        m_interactables.Clear(); 
-    }
-    public void useElementSet()
-    {
-        clearElementSet();
-        foreach (Transform element in m_elementsContainer)
-        {
-            m_elements.Add(element.GetComponent<ElementModel>());
-            m_interactables.Add(element);
-        }
-        m_useElements = false;
     }
 }

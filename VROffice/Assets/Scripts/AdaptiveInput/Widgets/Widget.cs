@@ -243,7 +243,6 @@ public class Widget : MonoBehaviour
                     facingUp = vec;
                 }
             }
-            Debug.Log(facingUser + " " + facingUp);
             m_targetRotation = Quaternion.LookRotation(facingUser?closestSurface.forward*-1:closestSurface.forward, facingUp);
             /*
             float dot = Vector3.Dot(closestSurface.up.normalized, this.transform.up.normalized);
