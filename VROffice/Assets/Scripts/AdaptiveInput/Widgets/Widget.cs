@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -218,8 +219,6 @@ public class Widget : MonoBehaviour
         }
         if (closestSurface != null)
         {
-            Vector3 headDirection = Camera.main.transform.position - closestSurface.position;
-            headDirection /= headDirection.magnitude;
             bool facingUser = normalFacingUser(closestSurface);
             
             this.transform.SetParent(closestSurface);
@@ -232,11 +231,13 @@ public class Widget : MonoBehaviour
             
             
             List<Vector3> possibleUp = new List<Vector3>(){closestSurface.up,closestSurface.up*-1,closestSurface.right,closestSurface.right*-1};
+            Vector3 headToSurfaceDirection = closestSurface.position - Camera.main.transform.position;
+            headToSurfaceDirection.y = 0;
             Vector3 facingUp = closestSurface.up;
             foreach (Vector3 vec in possibleUp)
             {
-                float newAngle = Vector3.Angle(Vector3.up, vec);
-                float minAngle = Vector3.Angle(Vector3.up, facingUp);
+                float newAngle = Math.Min(Vector3.Angle(Vector3.up, vec), Vector3.Angle(headToSurfaceDirection, vec));
+                float minAngle = Math.Min(Vector3.Angle(Vector3.up, facingUp), Vector3.Angle(headToSurfaceDirection, facingUp));
                 if (newAngle < minAngle)
                 {
                     facingUp = vec;

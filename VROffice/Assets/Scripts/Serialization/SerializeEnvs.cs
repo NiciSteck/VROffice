@@ -32,7 +32,7 @@ public class SerializeEnvs : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        saveEnvs();
+        //saveEnvs();
     }
 
     public void loadEnvs()
