@@ -272,7 +272,14 @@ public class NewRecognizeEnv : MonoBehaviour
         manager.Env = bestEnvObject.transform;
         manager.useEnvironment();
         
-        mrMapper.GetComponent<ReceivePlanes>().freeze = true;
+        ReceivePlanes planesScript = mrMapper.GetComponent<ReceivePlanes>();
+        planesScript.freeze = true;
+        // foreach (GameObject plane in planesScript.planes)
+        // {
+        //     plane.GetComponent<MeshRenderer>().enabled = false;
+        // }
+        // GameObject.Find("Point Cloud").GetComponent<MeshRenderer>().enabled = false;
+        mrMapper.GetComponent<AlignSystems>().enabledAlignment = true;
     }
     
     [Serializable]

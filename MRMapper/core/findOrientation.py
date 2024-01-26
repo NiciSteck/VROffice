@@ -26,65 +26,6 @@ def array_permutations(labels,points):
 def getCenteredPoints(points):
     return points - np.mean(points, axis=0)
 
-def find_init_rotation_old(sourceLabels, sourcePoints, targteLabels, targetPoints):
-    bestRes = None
-    bestRot = None
-    bestPerm = None
-
-    debugCount = 0
-
-    for labelsPermuted,pointsPermuted, perm in tqdm(array_permutations(sourceLabels), total=math.factorial(sourceLabels.size)):     
-        if np.array_equal(targteLabels, labelsPermuted):
-            rot, res = Rotation.align_vectors(pointsPermuted, targetPoints)
-
-            aplliedPoints = rot.apply(pointsPermuted)
-            fig = plt.figure(figsize=(6,6))
-            ax = fig.add_subplot(projection='3d')
-            jitter = 0.005 # make points visible
-            ax.scatter(aplliedPoints[:,0] + jitter, aplliedPoints[:,1] + jitter, aplliedPoints[:,2] + jitter)
-            ax.scatter(targetPoints[:, 0], targetPoints[:, 1], targetPoints[:, 2])
-            plt.savefig("init%s.png"%(debugCount))
-
-            if bestRes is None or res < bestRes:
-                bestRes = res
-                bestRot = rot
-                bestPerm = perm
-
-            debugCount += 1
-
-    return bestRot.as_quat, bestRes, bestPerm    
-
-def find_init_rotation(sourceLabels, sourcePoints, targteLabels, targetPoints):
-    #only works if the missrecognized planes are >= or <= the numer of actual planes for ALL LABELS. Not good enough
-    bestRes = None
-    bestRot = None
-    bestPerm = None
-
-    if sourceLabels.size < targteLabels.size:
-        #MrMapper recognized too many planes
-        for labelsPermuted,pointsPermuted, perm in tqdm(array_permutations(targteLabels,targetPoints), total=math.factorial(targteLabels.size)):
-            if np.array_equal(sourceLabels, labelsPermuted[:,:sourceLabels.size]):
-                sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (sourceLabels,sourcePoints,list(zip(labelsPermuted[:,:sourceLabels.size],pointsPermuted[:,:sourceLabels.size])))}, disp=True, niter_success=5)
-                if bestRes is None or sol.fun < bestRes:
-                    bestRes = sol.fun
-                    bestRot = sol.x
-                    bestPerm = perm
-
-    elif sourceLabels.size > targteLabels.size:
-        #MrMapper didnt recognize all planes
-        for labelsPermuted,pointsPermuted, perm in tqdm(array_permutations(sourceLabels), total=math.factorial(sourceLabels.size)):
-            if np.array_equal(targteLabels, labelsPermuted[:,:targteLabels.size]):
-                sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (labelsPermuted[:,:targteLabels.size],pointsPermuted[:,:targteLabels.size],list(zip(targteLabels,targetPoints)))}, disp=True, niter_success=5)
-                if bestRes is None or sol.fun < bestRes:
-                    bestRes = sol.fun
-                    bestRot = sol.x
-                    bestPerm = perm
-    else:       
-        #MrMapper recognized the same number of planes
-        sol = basinhopping(objective, [0,0,0,1], minimizer_kwargs = {"args": (sourceLabels,sourcePoints,list(zip(targteLabels,targetPoints)))}, niter_success=5)
-
-
-    return bestRes, bestRot, bestPerm
 
 def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource, permutationArrayTarget):
     #base case
@@ -169,14 +110,8 @@ def objective(quat, envPlanesLables, envPlanesPoints, mrPlanes):
 
 
 def find_rot(envLabels, envPoints, mrLabels, mrPoints):
-    # envLabels = np.genfromtxt(files.ENV,dtype=str)[:,0]
-    # print(envLabels)
-    # envPoints = np.genfromtxt(files.ENV)[:,1:]
-    # print(envPoints)
 
-    # mrLabels = np.genfromtxt(files.MR,dtype=str)[:,0]
-    # mrPoints = np.genfromtxt(files.MR)[:,1:]
-
+    originalNumberOfRecognizedPlanes = mrLabels.size
     #sanitize MrPlanes
     mrLabelsSanitized = np.copy(mrLabels)
     mrPointsSanitized = np.copy(mrPoints)
@@ -202,10 +137,12 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     print(initPermEnv)
     print(initPermMr)
 
+    mrLabels = np.concatenate(np.array(np.split(mrLabels, mrLabels.size/4))[initPermMr])
     mrPoints = np.vstack(np.array(np.vsplit(mrPoints, mrPoints[:,0].size/4))[initPermMr])
     mrMean = np.mean(mrPoints, axis=0)
     centeredMr = mrPoints - mrMean
 
+    envLabels = np.concatenate(np.array(np.split(envLabels, envLabels.size/4))[initPermEnv])
     envPoints = np.vstack(np.array(np.vsplit(envPoints, envPoints[:,0].size/4))[initPermEnv])
     envMean = np.mean(envPoints, axis=0)
     centeredEnv = envPoints - envMean
@@ -214,27 +151,18 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     if(solution.fun > 0.1):
         secondSolution = basinhopping(objective, solution.x, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, niter_success=10)
         if(secondSolution.fun < solution.fun):
+            print("second solution was better")
+            print(secondSolution.fun)
+            print("<")
+            print(solution.fun)
             solution = secondSolution
-    # solution = minimize(objective, initRot, args=(envLabels,centeredEnv,list(zip(mrLabels,centeredMr))), options={'disp': True})
-
-    sol = solution.x
-    print("({}f, {}f, {}f, {}f)".format(sol[0],sol[1],sol[2],sol[3]))
-    r = Rotation.from_quat(sol)
-
-    from_x = r.apply(centeredEnv)[:, 0]
-    from_y = r.apply(centeredEnv)[:, 1]
-    plt.figure(figsize=(12,12))
-    jitter = 0.005 # make points visible
-    plt.scatter(from_x + jitter, from_y + jitter)
-    plt.scatter(centeredMr[:, 0], centeredMr[:, 1])
-    plt.savefig("final2d.png")
 
     print(solution.fun)
-    print(solution.x)
-    normalizedQuat = r.as_quat()
+    normalizedQuat = Rotation.from_quat(solution.x).as_quat()
     print(normalizedQuat)
 
-    return normalizedQuat, solution.fun , envMean, mrMean
+    noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 0.001
+    return normalizedQuat, solution.fun + noisePenalty , envMean, mrMean
 
 def json_to_array(pointList):
     labels = []

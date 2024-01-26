@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Oculus.Interaction.PoseDetection;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,10 +11,11 @@ using UnityEngine.UIElements;
  */
 public class AlignSystems : MonoBehaviour
 {
-    GameObject realSense;
-    GameObject oculus;
-    GameObject offset; 
+    public GameObject realSense;
+    public GameObject oculus;
 
+    [NonSerialized]
+    public bool enabledAlignment = false;
     // define the position of the Oculus relative to the RealSense
     public Vector3 dist_fromQuestToRealSense = new Vector3(0, 0.05f, 0);
     public Vector3 rot_fromQuestToRealSense = new Vector3(0, 0, 0);
@@ -20,64 +23,38 @@ public class AlignSystems : MonoBehaviour
     private Quaternion realSenseToOculusRot;
 
     [SerializeField] private GameObject environments;
-    void Start()
-    {
-        realSense = GameObject.Find("RealSense");
-        oculus = GameObject.Find("CenterEyeAnchor");
-        offset = GameObject.Find("OVRCameraRig"); 
-    }
 
     public void updateCameras()
     {
-        realSenseToOculusRot = Quaternion.Euler(rot_fromQuestToRealSense);
-        Transform oTrans = oculus.transform;
+        if (enabledAlignment)
+        {
+            realSenseToOculusRot = Quaternion.Euler(rot_fromQuestToRealSense);
+            Transform oTrans = oculus.transform;
 
-        // compute where the RealSense should be positioned 
-        Vector3 shouldPos = oTrans.position + oTrans.up*dist_fromQuestToRealSense.y + oTrans.forward*dist_fromQuestToRealSense.z + oTrans.right*dist_fromQuestToRealSense.x;
-        Quaternion shouldRot = oTrans.rotation * realSenseToOculusRot;
+            // compute where the RealSense should be positioned 
+            Vector3 shouldPos = oTrans.position + oTrans.up * dist_fromQuestToRealSense.y +
+                                oTrans.forward * dist_fromQuestToRealSense.z +
+                                oTrans.right * dist_fromQuestToRealSense.x;
+            Quaternion shouldRot = oTrans.rotation * realSenseToOculusRot;
 
-        // where the RealSense is currently positioned
-        Vector3 isPos = realSense.transform.position;
-        Quaternion isRot = realSense.transform.rotation;
+            // where the RealSense is currently positioned
+            Vector3 isPos = realSense.transform.position;
+            Quaternion isRot = realSense.transform.rotation;
 
 
-        // compute the correction 
-        Vector3 posDiff = shouldPos - isPos;
-        Quaternion rotDiff = shouldRot * Quaternion.Inverse(isRot);
+            // compute the correction 
+            Vector3 posDiff = shouldPos - isPos;
+            Quaternion rotDiff = shouldRot * Quaternion.Inverse(isRot);
 
-        float absPosDiff = posDiff.magnitude;
-        float absRotDiff = 2f * Mathf.Rad2Deg * Mathf.Acos(Mathf.Abs(rotDiff.w));
-        
-        
-        float tPos = 0.05f;
-        float tRot = 10f;
+            float absPosDiff = posDiff.magnitude;
+            float absRotDiff = 2f * Mathf.Rad2Deg * Mathf.Acos(Mathf.Abs(rotDiff.w));
 
-        //move the entire MRMapper object to realign cameras and other children based on that
-        if (absPosDiff > tPos || absRotDiff > tRot)
-        {   
+
             transform.rotation = rotDiff * transform.rotation;
-
             isPos = realSense.transform.position;
             posDiff = shouldPos - isPos;
             transform.position = posDiff + transform.position;
             Debug.Log("Resetting Oculus offset");
-
-            
-            List<EnvModel> currentEnv = new List<EnvModel>(environments.GetComponentsInChildren<EnvModel>(false));
-            // NewRecognizeEnv alignEnvScript = environments.GetComponent<NewRecognizeEnv>();
-            // StartCoroutine(alignEnvScript.ExecuteOptimization(currentEnv));
-            
-            //or just this because reusing mr mapper planes in optimization later might not be optimal because the plane detections might get noisy
-            // foreach (EnvModel env in currentEnv)
-            // {
-            //     env.transform.rotation = rotDiff * env.transform.rotation;
-            //     env.transform.position = posDiff + env.transform.position;
-            // }
         }
-        
-        
-        
-
-  
     }
 }

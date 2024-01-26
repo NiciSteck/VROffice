@@ -54,7 +54,7 @@ public class Calibration : MonoBehaviour
 
     public void disable()
     {
-        // if (m_controllerObj != null)                     (only for adaptive controller needed)
+        // if (m_controllerObj != null)
         //     m_controllerObj.SetActive(false);
         // if (m_secondaryControllerObj != null)
         //     m_secondaryControllerObj.SetActive(false);
@@ -64,7 +64,7 @@ public class Calibration : MonoBehaviour
 
     public void reset()
     {
-        // if (m_controllerObj != null)                 (only for adaptive controller needed)
+        // if (m_controllerObj != null)
         //     m_controllerObj.SetActive(true);
         // if (m_secondaryControllerObj != null)
         //     m_secondaryControllerObj.SetActive(true);

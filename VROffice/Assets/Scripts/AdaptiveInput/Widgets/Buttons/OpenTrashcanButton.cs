@@ -29,7 +29,10 @@ public class OpenTrashcanButton : MenuButton
             Vector3 userPos = Camera.main.transform.position;
             userPos.y = 0;
             userPos.x -= 0.4f;
+            userPos.z += 0.1f;
             trashcan.transform.position = userPos;
+            trashcan.transform.rotation = Quaternion.identity;
+            trashcan.transform.parent = null;
             trashcan.SetActive(true);
         }
     }

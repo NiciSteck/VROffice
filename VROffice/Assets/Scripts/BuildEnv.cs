@@ -7,17 +7,11 @@ using UnityEditor;
 public class BuildEnv : MonoBehaviour
 {
     public PhysicalEnvironmentManager pEnvManager;
-    private GameObject mrMapper;
+    public GameObject mrMapper;
     [SerializeField] private Transform envCollection;
 
     public bool build;
     private bool buildPrev = false;
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        mrMapper = transform.gameObject;
-    }
 
     // Update is called once per frame
     void Update()
@@ -28,6 +22,14 @@ public class BuildEnv : MonoBehaviour
             newEnv.AddComponent<EnvModel>();
             newEnv.transform.SetParent(envCollection);
             StartCoroutine(setPoints(newEnv.transform));
+
+            ReceivePlanes planesScript = mrMapper.GetComponent<ReceivePlanes>();
+            planesScript.freeze = true;
+            // foreach (GameObject plane in planesScript.planes)
+            // {
+            //     plane.GetComponent<MeshRenderer>().enabled = false;
+            // }
+            // GameObject.Find("Point Cloud").GetComponent<MeshRenderer>().enabled = false;
         }
         buildPrev = build;
     }
@@ -60,6 +62,7 @@ public class BuildEnv : MonoBehaviour
         pEnvManager.Env = null;
         pEnvManager.m_definingNewElements = false;
         build = false;
+        mrMapper.GetComponent<AlignSystems>().enabledAlignment = true;
     }
 
     private void renameSurface(Transform env, string name)

@@ -83,14 +83,14 @@ public class PhysicalEnvironmentManager : MonoBehaviour
 
     public void disable()
     {
-        // if (m_controllerObj != null)             (only important with adaptive hands)
+        // if (m_controllerObj != null)
         //     m_controllerObj.SetActive(false);
         m_containerInstantiator.SetActive(false);
     }
 
     public void reset()
     {
-        // if (m_controllerObj != null)             (only important with adaptive hands)
+        // if (m_controllerObj != null)
         //     m_controllerObj.SetActive(true);
         m_containerInstantiator.SetActive(true);
 
@@ -366,7 +366,6 @@ public class PhysicalEnvironmentManager : MonoBehaviour
         {
             useEnvironment();
         }
-        disable();
     }
 
     /*
