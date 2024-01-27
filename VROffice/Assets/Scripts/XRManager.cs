@@ -1,24 +1,27 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class XRManager : MonoBehaviour
 {
+    public static XRManager Manager;
+    
     [Header("Skybox")]
     [SerializeField]
     private Material m_skybox;
 
     [Header("Passthrough")]
     [SerializeField]
-    private OVRManager m_ovrManager; 
-    [SerializeField]
     private OVRPassthroughLayer m_passthrough;
     [SerializeField]
     private bool m_usePassthrough = false;
     private bool m_usePassthroughPrev = false;
 
-    // Controls
-    //private bool m_pKey, m_pKeyPrev; 
+    private void Start()
+    {
+        Manager = this;
+    }
 
     public void setImmersive()
     {

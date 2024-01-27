@@ -12,8 +12,8 @@ public class NewRecognizeEnv : MonoBehaviour
     [SerializeField]
     private GameObject mrMapper;
 
-    [SerializeField] private bool align = false;
-    [SerializeField] private bool recenter = false;
+    public bool align = false;
+    public bool recenter = false;
     
     // Start is called before the first frame update
     void Start()

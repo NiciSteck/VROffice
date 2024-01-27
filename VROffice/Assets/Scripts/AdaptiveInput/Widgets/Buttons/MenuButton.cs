@@ -9,8 +9,7 @@ public class MenuButton : WidgetApplication
     protected Transform m_attachedWindow;
 
     [Header("Placement")]
-    [SerializeField]
-    protected Vector2 m_offset;
+    public Vector2 m_offset;
     [SerializeField]
     protected Vector2 m_offsetScaled; 
 
@@ -28,12 +27,7 @@ public class MenuButton : WidgetApplication
 
         this.transform.rotation = Quaternion.LookRotation(windowForward, windowUp);
     }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    
 
     // Update is called once per frame
     protected void Update()

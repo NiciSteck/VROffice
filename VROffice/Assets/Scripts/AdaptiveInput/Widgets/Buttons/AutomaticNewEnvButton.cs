@@ -1,9 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-public class ManualNewEnvButton : MenuButton
+public class AutomaticNewEnvButton : MenuButton
 {
     public List<GameObject> otherButtons;
     public ConfirmButton confirmButton;
@@ -22,35 +21,28 @@ public class ManualNewEnvButton : MenuButton
         {
             m_icon.material = m_newIcon;
             XRManager.Manager.setImmersive();
-            PhysicalEnvironmentManager.Environment.m_definingNewElements = false;
             foreach (GameObject button in otherButtons)
             {
                 button.SetActive(true);
             }
             confirmButton.gameObject.SetActive(false);
             pressed = false;
-
         }
         else
         {
+            //maybe start MRMapper here?
             m_icon.material = m_backIcon;
             XRManager.Manager.setPassthrough();
-            PhysicalEnvironmentManager.Environment.m_definingNewElements = true;
             foreach (GameObject button in otherButtons)
             {
                 button.SetActive(false);
             }
             confirmButton.m_offset.y = m_offset.y + 0.09f;
-            confirmButton.caller = ConfirmButton.Caller.ManualNew;
+            confirmButton.caller = ConfirmButton.Caller.AutomaticNew;
             confirmButton.gameObject.SetActive(true);
             
             pressed = true;
         }
-        
-    }
-
-    private void Start()
-    {
         
     }
 }

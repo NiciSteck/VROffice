@@ -5,8 +5,8 @@ using UnityEngine.Serialization;
 
 public class ManualOldEnvButton : MenuButton
 {
-    public XRManager xrManager;
     public List<GameObject> otherButtons;
+    public ConfirmButton confirmButton;
     private bool pressed;
     
     [Header("Icon")]
@@ -18,6 +18,7 @@ public class ManualOldEnvButton : MenuButton
     private Material m_backIcon;
     public override void attach(Controller controller)
     {
+        //TODO figure out a way to selcet from envs
         if (pressed)
         {
             m_icon.material = m_oldIcon;
@@ -26,6 +27,7 @@ public class ManualOldEnvButton : MenuButton
             {
                 button.SetActive(true);
             }
+            confirmButton.gameObject.SetActive(false);
             pressed = false;
 
         }
@@ -37,6 +39,10 @@ public class ManualOldEnvButton : MenuButton
             {
                 button.SetActive(false);
             }
+            confirmButton.m_offset.y = m_offset.y + 0.09f;
+            confirmButton.caller = ConfirmButton.Caller.ManualOld;
+            confirmButton.gameObject.SetActive(true);
+            
             pressed = true;
         }
         
