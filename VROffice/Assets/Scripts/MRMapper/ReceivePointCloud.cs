@@ -38,7 +38,7 @@ public class ReceivePointCloud : RosReceiver
         // setup mesh filter and renderer
         MeshFilter meshFilter = pointCloud.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = pointCloud.AddComponent<MeshRenderer>();
-        meshRenderer.material = new Material(Shader.Find("Particles/Standard Unlit"));
+        meshRenderer.material = new Material(Shader.Find("Oculus Sample/Button Glow"));
         meshRenderer.material.SetColor("_Color", Color.white);
         meshRenderer.material.SetFloat("_PointSize", pointSize);
 

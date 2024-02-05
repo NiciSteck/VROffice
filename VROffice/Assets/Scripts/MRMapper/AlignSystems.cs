@@ -14,7 +14,6 @@ public class AlignSystems : MonoBehaviour
     public GameObject realSense;
     public GameObject oculus;
 
-    [NonSerialized]
     public bool enabledAlignment = false;
     // define the position of the Oculus relative to the RealSense
     public Vector3 dist_fromQuestToRealSense = new Vector3(0, 0.05f, 0);

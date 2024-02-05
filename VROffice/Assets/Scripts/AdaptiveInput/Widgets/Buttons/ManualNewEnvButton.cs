@@ -23,6 +23,8 @@ public class ManualNewEnvButton : MenuButton
             m_icon.material = m_newIcon;
             XRManager.Manager.setImmersive();
             PhysicalEnvironmentManager.Environment.m_definingNewElements = false;
+            PhysicalEnvironmentManager.Environment.clearEnv();
+            Destroy(PhysicalEnvironmentManager.Environment.Env.gameObject);
             foreach (GameObject button in otherButtons)
             {
                 button.SetActive(true);
