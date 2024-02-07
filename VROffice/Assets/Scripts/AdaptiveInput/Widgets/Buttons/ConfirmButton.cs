@@ -16,7 +16,6 @@ public class ConfirmButton : MenuButton
 
     public GameObject environments;
     public Transform menuHandle;
-    
     public override void attach(Controller controller)
     {
         switch (caller)
@@ -26,7 +25,11 @@ public class ConfirmButton : MenuButton
                 environments.GetComponent<SerializeEnvs>().save = true;
                 break;
             case Caller.ManualOld:
-                //maybe turn off calibration?
+                Calibration.Calibrator.calibrating = false;
+                foreach (ReferenceButton reference in environments.GetComponentsInChildren<ReferenceButton>(true))
+                {
+                    reference.gameObject.SetActive(false);
+                }
                 break;
             case Caller.AutomaticNew:
                 environments.GetComponent<BuildEnv>().build = true;

@@ -8,6 +8,7 @@ TagManager:
   - Surface
   - Volume
   - Deletable
+  - Reference
   layers:
   - Default
   - TransparentFX

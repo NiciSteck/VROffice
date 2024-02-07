@@ -181,7 +181,12 @@ public class PointController : Controller
             toSelected = facingUser ? toSelected * -1 : toSelected;
         }
         else
+        {
             toSelected = m_selectedWidget.transform.InverseTransformDirection(toSelected);
+            bool facingUser = normalFacingUser(m_selectedWidget.transform);
+            toSelected = facingUser ? toSelected * -1 : toSelected;
+        }
+
         if (toSelected.z > m_releaseThreshold)
             return true;
 

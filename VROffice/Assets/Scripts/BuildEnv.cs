@@ -36,7 +36,7 @@ public class BuildEnv : MonoBehaviour
 
     private IEnumerator setPoints(Transform env)
     {
-        pEnvManager.Env = env.transform;
+        pEnvManager.Env = env;
         pEnvManager.m_definingNewElements = true;
         
         EnvModel model = env.GetComponent<EnvModel>();
@@ -58,8 +58,7 @@ public class BuildEnv : MonoBehaviour
             renameSurface(env,plane.name);
         }
         centerOnChildren(env);
-        
-        pEnvManager.Env = null;
+        pEnvManager.useEnvironment();
         pEnvManager.m_definingNewElements = false;
         build = false;
         mrMapper.GetComponent<AlignSystems>().enabledAlignment = true;

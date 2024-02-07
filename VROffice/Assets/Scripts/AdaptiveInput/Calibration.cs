@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Calibration : MonoBehaviour
 {
+    public static Calibration Calibrator;
+    
     [Header("Controllers")]
     [SerializeField]
     private GameObject m_controllerObj;
@@ -34,6 +36,7 @@ public class Calibration : MonoBehaviour
     public Transform virtualReference
     {
         set { m_virtualReference = value; }
+        get { return m_virtualReference; }
     }
     [SerializeField]
     private Transform m_environment;
@@ -183,6 +186,7 @@ public class Calibration : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Calibrator = this;
         //disable();
     }
 

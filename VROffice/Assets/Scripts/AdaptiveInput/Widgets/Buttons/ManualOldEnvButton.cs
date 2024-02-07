@@ -5,51 +5,37 @@ using UnityEngine.Serialization;
 
 public class ManualOldEnvButton : MenuButton
 {
+    public Transform environmentsReference;
     public List<GameObject> otherButtons;
-    public ConfirmButton confirmButton;
-    private bool pressed;
-    
-    [Header("Icon")]
-    [SerializeField]
-    private MeshRenderer m_icon;
-    [SerializeField]
-    private Material m_oldIcon;
-    [SerializeField]
-    private Material m_backIcon;
+    public ConfirmSelectionButton confirmSelectionButton;
+    public BackButton backButton;
+    public NextButton nextButton;
+    public PrevButton prevButton;
+    public List<Transform> environmentsTransforms;
     public override void attach(Controller controller)
     {
         //TODO figure out a way to selcet from envs
-        if (pressed)
+        foreach (GameObject button in otherButtons)
         {
-            m_icon.material = m_oldIcon;
-
-            foreach (GameObject button in otherButtons)
-            {
-                button.SetActive(true);
-            }
-            confirmButton.gameObject.SetActive(false);
-            pressed = false;
-
+            button.SetActive(false);
         }
-        else
-        {
-            m_icon.material = m_backIcon;
+        gameObject.SetActive(false);
 
-            foreach (GameObject button in otherButtons)
-            {
-                button.SetActive(false);
-            }
-            confirmButton.m_offset.y = m_offset.y + 0.09f;
-            confirmButton.caller = ConfirmButton.Caller.ManualOld;
-            confirmButton.gameObject.SetActive(true);
-            
-            pressed = true;
-        }
+        confirmSelectionButton.step = ConfirmSelectionButton.Step.SelectEnv;
+        confirmSelectionButton.gameObject.SetActive(true);
+        backButton.caller = BackButton.Caller.ManualOld;
+        backButton.gameObject.SetActive(true);
         
+        nextButton.gameObject.SetActive(true);
+        prevButton.gameObject.SetActive(true);
     }
 
-    private void Start()
-    {
-        
+    IEnumerator Start()
+    { 
+        yield return new WaitForSeconds(0.5f);
+        foreach (Transform env in environmentsReference)
+        {
+            environmentsTransforms.Add(env);
+        }
     }
 }
