@@ -2327,6 +2327,7 @@ MonoBehaviour:
   m_offset: {x: 0.08, y: -0.04}
   m_offsetScaled: {x: 0.5, y: 0.5}
   oldButton: {fileID: 6625448523576736183}
+  nextButton: {fileID: 1221051086}
 --- !u!114 &710663931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4459,6 +4460,7 @@ MonoBehaviour:
   m_offset: {x: 0.24, y: -0.04}
   m_offsetScaled: {x: 0.5, y: 0.5}
   oldButton: {fileID: 6625448523576736183}
+  prevButton: {fileID: 710663930}
 --- !u!114 &1221051087
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -213,8 +213,8 @@ public class Calibration : MonoBehaviour
             updatePoint(position, rotation);
             if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, m_controller))
                 setPoint(position);
-            if (OVRInput.GetDown(OVRInput.Button.One, m_controller))
-                calibrateSurface(); 
+            // if (OVRInput.GetDown(OVRInput.Button.One, m_controller))
+            //     calibrateSurface(); 
         }
 
         m_calibratingPrev = m_calibrating;

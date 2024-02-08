@@ -7,13 +7,35 @@ using UnityEngine.Serialization;
 public class PrevButton : MenuButton
 {
     public ManualOldEnvButton oldButton;
+    public NextButton nextButton;
+    public Coroutine activeSpinRoutine;
     public override void attach(Controller controller)
     {
         List<Transform> envs = oldButton.environmentsTransforms;
-        envs.First().gameObject.SetActive(false);
-        Transform last = envs.Last();
-        envs.Remove(last);
-        envs.Insert(0,last);
-        last.gameObject.SetActive(true);
+        Transform oldFirst = envs.First();
+        oldFirst.gameObject.SetActive(false);
+        Debug.Log("before StopRoutine prev");
+        StopCoroutine(activeSpinRoutine);
+        oldFirst.localScale = Vector3.one;
+        
+        Transform newFirst = envs.Last();
+        envs.Remove(newFirst);
+        envs.Insert(0,newFirst);
+        newFirst.position = transform.position + Vector3.ProjectOnPlane(transform.forward, Vector3.up) * 0.5f +
+                            Vector3.ProjectOnPlane(transform.right, Vector3.up) * 0.08f;
+        newFirst.localScale = Vector3.one * 0.6f;
+        newFirst.gameObject.SetActive(true);
+        Debug.Log("before StartRoutine prev");
+        activeSpinRoutine = StartCoroutine(Spin(newFirst));
+        nextButton.activeSpinRoutine = activeSpinRoutine;
+    }
+
+    IEnumerator Spin(Transform currentEnv)
+    {
+        while (true)
+        {
+            currentEnv.Rotate(Vector3.up,0.2f);
+            yield return null;
+        }
     }
 }

@@ -40,6 +40,7 @@ public class BackSelectionButton : MenuButton
                 break;
             case Step.Calibrate:
                 Calibration.Calibrator.calibrating = false;
+                step = Step.SelectRef;
                 confirmSelectionButton.step = ConfirmSelectionButton.Step.SelectRef;
                 confirmButton.gameObject.SetActive(false);
                 confirmSelectionButton.gameObject.SetActive(true);

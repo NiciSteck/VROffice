@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Directory = UnityEngine.Windows.Directory;
 
@@ -75,6 +76,8 @@ public class SerializeEnvs : MonoBehaviour
                         
                         envModel.containers.Add(container.GetComponent<ContainerModel>());
                     }
+                    centerOnChildren(env.transform);
+                    env.transform.position = Vector3.zero;
                 }
                 
             }
@@ -84,6 +87,22 @@ public class SerializeEnvs : MonoBehaviour
             }
         }
         
+    }
+    
+    public void centerOnChildren(Transform parent)
+    {
+        List<Transform> children = parent.Cast<Transform>().ToList();
+        Vector3 center = Vector3.zero;
+        foreach (Transform child in children)
+        {
+            center += child.position;
+            child.parent = null;
+        }
+        parent.position = center/children.Count;
+        foreach (Transform child in children)
+        {
+            child.parent = parent;
+        }
     }
 
     public void saveEnvs()
