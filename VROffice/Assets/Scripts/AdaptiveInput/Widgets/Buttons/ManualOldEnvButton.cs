@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -28,6 +29,8 @@ public class ManualOldEnvButton : MenuButton
         
         nextButton.gameObject.SetActive(true);
         prevButton.gameObject.SetActive(true);
+        
+        StudyTimer.Timer.startTimer("ManualOld");
     }
 
     IEnumerator Start()

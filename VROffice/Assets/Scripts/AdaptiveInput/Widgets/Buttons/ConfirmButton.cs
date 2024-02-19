@@ -21,8 +21,16 @@ public class ConfirmButton : MenuButton
         switch (caller)
         {
             case Caller.ManualNew:
-                PhysicalEnvironmentManager.Environment.m_definingNewElements = false;
-                environments.GetComponent<SerializeEnvs>().save = true;
+                if (PhysicalEnvironmentManager.Environment.Env.childCount == 0)
+                {
+                    return;
+                }
+                else
+                {
+                    PhysicalEnvironmentManager.Environment.m_definingNewElements = false;
+                    environments.GetComponent<SerializeEnvs>().save = true;
+                }
+
                 break;
             case Caller.ManualOld:
                 Calibration.Calibrator.calibrating = false;
@@ -39,10 +47,12 @@ public class ConfirmButton : MenuButton
                 break;
         }
         XRManager.Manager.setImmersive();
-        menuHandle.gameObject.SetActive(true);
+        //menuHandle.gameObject.SetActive(true);
         Transform user = Camera.main.transform;
         menuHandle.position = user.position + user.forward * 0.5f + user.right * 0.2f;
         menuHandle.rotation = Quaternion.LookRotation(menuHandle.position - user.position);
         transform.parent.gameObject.SetActive(false);
+        
+        StudyTimer.Timer.stopTimer();
     }
 }

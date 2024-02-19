@@ -33,7 +33,7 @@ public class NextButton : MenuButton
     private void OnEnable()
     {
         Transform env = oldButton.environmentsTransforms.First();
-        env.position = transform.position + Vector3.ProjectOnPlane(transform.forward, Vector3.up) * 0.5f +
+        env.position = transform.position + new Vector3(m_offset.x,0f,0f) + Vector3.ProjectOnPlane(transform.forward, Vector3.up) * 0.5f +
                             Vector3.ProjectOnPlane(transform.right, Vector3.up) * -0.08f;
         env.localScale = Vector3.one * 0.6f;
         env.gameObject.SetActive(true);
@@ -47,7 +47,7 @@ public class NextButton : MenuButton
         env.gameObject.SetActive(false);
         env.localScale = Vector3.one;
         Transform user = Camera.main.transform;
-        env.position = user.position + user.forward * 0.5f + user.right * 0.2f;
+        env.position = user.position + user.forward * 0.5f + user.right * 0.2f - user.up * 0.3f;
         StopCoroutine(activeSpinRoutine);
     }
     

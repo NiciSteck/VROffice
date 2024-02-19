@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -24,5 +25,7 @@ public class ManualNewEnvButton : MenuButton
         confirmButton.gameObject.SetActive(true);
         backButton.caller = BackButton.Caller.ManualNew;
         backButton.gameObject.SetActive(true);
+        
+        StudyTimer.Timer.startTimer("ManualNew");
     }
 }

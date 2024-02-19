@@ -141,13 +141,13 @@ public class NewRecognizeEnv : MonoBehaviour
         foreach (Transform environment in transform)
         {
             EnvModel env = environment.GetComponent<EnvModel>();
-            if (env != null)
+            if (env != null && env.containers.Count > 0 && !env.containers.First().gameObject.name.Contains("Surface"))
                 envList.Add(env);
         }
 
         List<EnvModel> probableEnvs = new List<EnvModel>();
         int allowedNoise = 1;
-        //assign a similarity score to each environment
+
         foreach (EnvModel envModel in envList)
         {
             Transform env = envModel.gameObject.transform;
@@ -203,7 +203,7 @@ public class NewRecognizeEnv : MonoBehaviour
     public IEnumerator ExecuteOptimization(List<EnvModel> probableEnvs)
     {
         //get Planes form MrMapper
-        //List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes; only works with the real mrmapper
+        //List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes; //only works with the real mrmapper
         List<GameObject> mrPlanes = new List<GameObject>();
         foreach (Transform mrPlaneTrans in mrMapper.transform)
         {

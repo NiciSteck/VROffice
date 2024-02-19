@@ -22,5 +22,7 @@ public class AutomaticNewEnvButton : MenuButton
         confirmButton.gameObject.SetActive(true);
         backButton.caller = BackButton.Caller.AutomaticNew;
         backButton.gameObject.SetActive(true);
+        
+        StudyTimer.Timer.startTimer("AutomaticNew");
     }
 }

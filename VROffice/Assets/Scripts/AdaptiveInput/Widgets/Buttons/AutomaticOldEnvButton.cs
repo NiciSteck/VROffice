@@ -22,5 +22,7 @@ public class AutomaticOldEnvButton : MenuButton
         confirmButton.gameObject.SetActive(true);
         backButton.caller = BackButton.Caller.AutomaticOld;
         backButton.gameObject.SetActive(true);
+        
+        StudyTimer.Timer.startTimer("AutomaticOld");
     }
 }

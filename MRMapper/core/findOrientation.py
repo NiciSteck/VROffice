@@ -123,6 +123,9 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     mrLabels = mrLabelsSanitized
     mrPoints = mrPointsSanitized
 
+    #check if we didnt sanitize all points
+    assert mrPoints.size > 0
+
     #check that we received all the planes
     assert envLabels.size % 4 == 0
     assert mrLabels.size % 4 == 0
@@ -161,7 +164,10 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     normalizedQuat = Rotation.from_quat(solution.x).as_quat()
     print(normalizedQuat)
 
-    noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 0.001
+    #noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 0.01 #probably needs to adjust depending on size of environment (the bgger the env the smaller the penalty)
+    noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size/4) * 1.0 #for study
+    print(noisePenalty)
+
     return normalizedQuat, solution.fun + noisePenalty , envMean, mrMean
 
 def json_to_array(pointList):
