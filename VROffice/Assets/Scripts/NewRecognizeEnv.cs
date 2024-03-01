@@ -255,6 +255,7 @@ public class NewRecognizeEnv : MonoBehaviour
                 bestEnvObject = envObject;
             }
             RestClient.Put("http://127.0.0.1:5005/reset", "{}");
+            Debug.Log("End Of Loop");
         }
         
         

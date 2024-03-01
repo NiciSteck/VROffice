@@ -165,7 +165,9 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     print(normalizedQuat)
 
     #noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 0.01 #probably needs to adjust depending on size of environment (the bgger the env the smaller the penalty)
-    noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size/4) * 1.0 #for study
+    noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 1.0 #for study
+    print(originalNumberOfRecognizedPlanes)
+    print(mrLabels.size)
     print(noisePenalty)
 
     return normalizedQuat, solution.fun + noisePenalty , envMean, mrMean
