@@ -43,7 +43,7 @@ public class ConfirmButton : MenuButton
                 environments.GetComponent<BuildEnv>().build = true;
                 break;
             case Caller.AutomaticOld:
-                environments.GetComponent<NewRecognizeEnv>().align = true;
+                environments.GetComponent<RecognizeEnv>().align = true;
                 break;
         }
         XRManager.Manager.setImmersive();

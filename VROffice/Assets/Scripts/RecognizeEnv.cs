@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class NewRecognizeEnv : MonoBehaviour
+public class RecognizeEnv : MonoBehaviour
 {
     [SerializeField]
     private GameObject mrMapper;
@@ -123,7 +123,7 @@ public class NewRecognizeEnv : MonoBehaviour
         return corners;
     }
     
-    //returns the most similar Environment to the Surfaces recognized by MRMapper
+    //returns the most similar Environments to the Surfaces recognized by MRMapper
     public List<EnvModel> recognize()
     {
         //List<GameObject> planes = mrMapper.GetComponent<ReceivePlanes>().planes; only works with the real mrmapper

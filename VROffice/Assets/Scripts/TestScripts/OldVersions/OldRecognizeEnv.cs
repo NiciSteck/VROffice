@@ -6,7 +6,7 @@ using Proyecto26;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class RecognizeEnv : MonoBehaviour
+public class OldRecognizeEnv : MonoBehaviour
 {
     private List<EnvModel> envList = new List<EnvModel>();
 

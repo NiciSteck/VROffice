@@ -164,8 +164,8 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     normalizedQuat = Rotation.from_quat(solution.x).as_quat()
     print(normalizedQuat)
 
-    #noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 0.01 #probably needs to adjust depending on size of environment (the bgger the env the smaller the penalty)
-    noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 1.0 #for study
+    noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 0.01 #probably sensible to adjust depending on size of environment (the bgger the env the smaller the penalty).
+
     print(originalNumberOfRecognizedPlanes)
     print(mrLabels.size)
     print(noisePenalty)
