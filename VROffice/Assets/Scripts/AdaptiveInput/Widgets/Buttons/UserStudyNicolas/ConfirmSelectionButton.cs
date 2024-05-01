@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/*
+ * Special confirm button used in the Manual User Study
+ */
+
 public class ConfirmSelectionButton : MenuButton
 {
     

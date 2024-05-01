@@ -1556,7 +1556,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mrMapper: {fileID: 0}
-  align: 0
+  calibrate: 0
   recenter: 0
 --- !u!4 &451083658
 Transform:
@@ -8241,7 +8241,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2034060066
 Transform:
   m_ObjectHideFlags: 0
@@ -8269,7 +8269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd0f9eec745d0aa4ba79e36af06a398c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  participant: Julian
+  participant: Nicolas
   latin: 3
 --- !u!1 &2055440815
 GameObject:

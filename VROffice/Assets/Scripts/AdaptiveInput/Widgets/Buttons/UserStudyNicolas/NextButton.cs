@@ -6,6 +6,10 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+/*
+ * This button shows the user the next saved Environment
+ */
+
 public class NextButton : MenuButton
 {
     public ManualOldEnvButton oldButton;
@@ -33,7 +37,7 @@ public class NextButton : MenuButton
     private void OnEnable()
     {
         Transform env = oldButton.environmentsTransforms.First();
-        env.position = transform.position + new Vector3(m_offset.x,0f,0f) + Vector3.ProjectOnPlane(transform.forward, Vector3.up) * 0.5f +
+        env.position = transform.position + new Vector3(m_offset.x, m_offset.y,0f) + Vector3.ProjectOnPlane(transform.forward, Vector3.up) * 0.5f +
                             Vector3.ProjectOnPlane(transform.right, Vector3.up) * -0.08f;
         env.localScale = Vector3.one * 0.6f;
         env.gameObject.SetActive(true);

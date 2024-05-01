@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * This button starts the Autonatic Definition of an Environment
+ */
 public class AutomaticNewEnvButton : MenuButton
 {
     public List<GameObject> otherButtons;
@@ -10,7 +13,6 @@ public class AutomaticNewEnvButton : MenuButton
 
     public override void attach(Controller controller)
     {
-        //maybe start MRMapper here?
         XRManager.Manager.setPassthrough();
         foreach (GameObject button in otherButtons)
         {

@@ -6,24 +6,24 @@ using Proyecto26;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Serialization;
 
-public class RecognizeEnv : MonoBehaviour
+/*
+ * This script automatically calibrates an Environment. It sends saved Environments and the captures Surfaces to a python script for recognition and alignment.
+ */
+
+public class CalibrateEnv : MonoBehaviour
 {
     [SerializeField]
     private GameObject mrMapper;
 
-    public bool align = false;
+    public bool calibrate = false;
+    //when recenter is true, only the active Environment is sent to the alignment script
     public bool recenter = false;
     
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
     void Update()
     {
-        if (align||recenter)
+        if (calibrate||recenter)
         {
             List<EnvModel> probableEnvs = new List<EnvModel>();
             if (recenter)
@@ -36,10 +36,10 @@ public class RecognizeEnv : MonoBehaviour
                 {
                     child.gameObject.SetActive(false);
                 }
-                probableEnvs = recognize();
+                probableEnvs = compareSurfaces();
             }
             
-            align = false;
+            calibrate = false;
             recenter = false;
             StartCoroutine(ExecuteOptimization(probableEnvs));
         }
@@ -86,7 +86,7 @@ public class RecognizeEnv : MonoBehaviour
         vertices = vertices.Distinct().ToArray();
         Array.Sort(vertices,new Vector3Comparer());
         
-        //since the planes of AdaptiveInput are scaled cubes we have 8 points which we need to merge to 4
+        //since the planes of AdaptiveInput are scaled cubes we have 8 corners that we need to merge into 4 corners
         Vector3[] corners = new Vector3[4];
         if (vertices.Length == 8)
         {
@@ -97,7 +97,7 @@ public class RecognizeEnv : MonoBehaviour
                 for (int i = 0; i < 4; i++)
                 {
                     Vector3 corner = corners[i];
-                    if ((vertex - corner).magnitude < 0.002) //unless the plane is tiny we vertex and corner are the same corner of the planecube, just 0.001 appart
+                    if ((vertex - corner).magnitude < 0.002)
                     {
                         corners[i] = (vertex + corner) / 2;
                         alreadySelected = true;
@@ -115,27 +115,23 @@ public class RecognizeEnv : MonoBehaviour
             {
                 Debug.Log("corners might be detected wrong");
             }
+        } else if (vertices.Length == 4)
+        {
+                
+            corners = vertices;
         } else
         {
-            corners = vertices; //if there is an error here the provided Mesh is not supported (only planes with 4 vertices or cubes from AdaptiveInput)
+            Debug.LogError(
+                "Error: The passed plane is not supported. Only planes with 4 vertices or cubes from AdaptiveInput should be passed.");
         }
-
+        
         return corners;
     }
     
-    //returns the most similar Environments to the Surfaces recognized by MRMapper
-    public List<EnvModel> recognize()
+    //returns the Environments that have a similar amount of surfaces with the same labels as the captured Surfaces from MRMapper.
+    public List<EnvModel> compareSurfaces()
     {
-        //List<GameObject> planes = mrMapper.GetComponent<ReceivePlanes>().planes; only works with the real mrmapper
-        List<GameObject> planes = new List<GameObject>();
-        foreach (Transform mrPlaneTrans in mrMapper.transform)
-        {
-            GameObject mrChild = mrPlaneTrans.gameObject;
-            if (mrChild.name.Contains("plane"))
-            {
-                planes.Add(mrChild);
-            }
-        }
+        List<GameObject> planes = mrMapper.GetComponent<ReceivePlanes>().planes;
     
         List<EnvModel> envList = new List<EnvModel>();
         foreach (Transform environment in transform)
@@ -180,12 +176,6 @@ public class RecognizeEnv : MonoBehaviour
         return probableEnvs;
     }
 
-    //returns input number if both inputs are the same. If they are unequal it deducts the absolute difference between the two with a minimum of 0
-    private int symmDiff(int soll, int ist)
-    {
-        return Math.Max(0, soll - Math.Abs(soll - ist));
-    }
-
     public void centerChildrenOnPoint(Transform parent, Vector3 center)
     {
         List<Transform> children = parent.Cast<Transform>().ToList();
@@ -200,27 +190,21 @@ public class RecognizeEnv : MonoBehaviour
         }
     }
 
+    //This Coroutine calls the "findOrientation" python for each passed Environment and executes the alignment for the Environment with the smallest Error
     public IEnumerator ExecuteOptimization(List<EnvModel> probableEnvs)
     {
+        const float wait = 0.1f;
+        const int timeout = 50;        
+        
         //get Planes form MrMapper
-        //List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes; //only works with the real mrmapper
-        List<GameObject> mrPlanes = new List<GameObject>();
-        foreach (Transform mrPlaneTrans in mrMapper.transform)
-        {
-            GameObject mrChild = mrPlaneTrans.gameObject;
-            if (mrChild.name.Contains("plane"))
-            {
-                mrPlanes.Add(mrChild);
-            }
-        }
+        List<GameObject> mrPlanes = mrMapper.GetComponent<ReceivePlanes>().planes;
 
         String jsonMr = jsonifyPlanes(mrPlanes, true);
-
-        float wait = 0.1f;
-        int timeout = 50;
+        
         OptimizationResult bestResult = new OptimizationResult{quat = new float[]{0.0f,0.0f,0.0f,1.0f},error = float.MaxValue,completed = false};
         GameObject bestEnvObject = null;
-
+        
+        //find the alignment for all passed Surfaces
         foreach (EnvModel env in probableEnvs)
         {
             //get Planes of the Envirnment
@@ -229,14 +213,15 @@ public class RecognizeEnv : MonoBehaviour
             {
                 envPlanes.Add(container.gameObject);
             }
-            GameObject envObject = env.gameObject;
             
-            //RestClient.Get("http://127.0.0.1:5005/result").Then(response => Debug.Log("Get: " + response.Text)); //debug
+            //pass the Environment and the captured Surfaces to the script over a Rest API
             Debug.Log(env.gameObject.name);
             String restMessage = "{" + jsonifyPlanes(envPlanes, false) + "," + jsonMr + "}";
             RestClient.Put("http://127.0.0.1:5005/result",restMessage).Then(response => Debug.Log("Put: " + response.Text));
             
             OptimizationResult result = new OptimizationResult{quat = new float[]{0.0f,0.0f,0.0f,1.0f},error = float.MaxValue,completed = false};
+            
+            //wait for the script to finish
             int count = 0;
             while (!result.completed&&count<timeout)
             {
@@ -252,35 +237,40 @@ public class RecognizeEnv : MonoBehaviour
             } else if (result.error < bestResult.error)
             {
                 bestResult = result;
-                bestEnvObject = envObject;
+                bestEnvObject = env.gameObject;
             }
+            
+            //reset the script
             RestClient.Put("http://127.0.0.1:5005/reset", "{}");
             Debug.Log("End Of Loop");
         }
         
-        
-        
-        
+        //apply the results of the calibration
         Quaternion optimizedRot = new Quaternion(bestResult.quat[0], bestResult.quat[1], bestResult.quat[2], bestResult.quat[3]);
         Vector3 envCenterPoint = new Vector3(bestResult.envCenter[0], bestResult.envCenter[1], bestResult.envCenter[2]);
         Vector3 mrCenterPoint = new Vector3(bestResult.mrCenter[0], bestResult.mrCenter[1], bestResult.mrCenter[2]);
         centerChildrenOnPoint(bestEnvObject.transform, envCenterPoint);
         bestEnvObject.transform.localRotation = optimizedRot * bestEnvObject.transform.localRotation;
         
+        //lign up the centroid of the Environment with the centroid of the captured Surfaces
         bestEnvObject.transform.position = mrCenterPoint;
-
+        
+        //activate the Environment
         PhysicalEnvironmentManager manager = transform.parent.GetComponent<PhysicalEnvironmentManager>();
         manager.Env = bestEnvObject.transform;
         manager.useEnvironment();
         
+        //stop MRMapper from updating the captured Surfaces so we can recenter on the same set of Surfaces
         ReceivePlanes planesScript = mrMapper.GetComponent<ReceivePlanes>();
         planesScript.freeze = true;
         
+        //hide MRMapper
         foreach (GameObject plane in planesScript.planes)
         {
             plane.GetComponent<MeshRenderer>().enabled = false;
         }
         GameObject.Find("Point Cloud").GetComponent<MeshRenderer>().enabled = false;
+        
         
         mrMapper.GetComponent<AlignSystems>().enabledAlignment = true;
     }

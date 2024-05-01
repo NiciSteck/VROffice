@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * This Button returns the user to the previous Menu state
+ */
+
 public class BackButton : MenuButton
 {
     public enum Caller

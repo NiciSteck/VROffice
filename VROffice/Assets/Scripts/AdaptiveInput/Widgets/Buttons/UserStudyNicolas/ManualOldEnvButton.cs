@@ -4,6 +4,10 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+/*
+ * This button starts the Manual Calibration of an Environment
+ */
+
 public class ManualOldEnvButton : MenuButton
 {
     public Transform environmentsReference;
@@ -15,7 +19,6 @@ public class ManualOldEnvButton : MenuButton
     public List<Transform> environmentsTransforms;
     public override void attach(Controller controller)
     {
-        //TODO figure out a way to selcet from envs
         foreach (GameObject button in otherButtons)
         {
             button.SetActive(false);

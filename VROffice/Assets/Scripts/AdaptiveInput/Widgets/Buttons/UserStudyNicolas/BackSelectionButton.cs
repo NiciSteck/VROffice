@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * Special back button used in the Manual User Study
+ */
+
 public class BackSelectionButton : MenuButton
 {
     public enum Step

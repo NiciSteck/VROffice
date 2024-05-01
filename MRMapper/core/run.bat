@@ -8,4 +8,4 @@ start "MRDocker" docker run  -it --rm ^
             bash -c "dos2unix /root/catkin_ws/src/mr-mapper/src/* && source /opt/ros/noetic/setup.bash && source ~/catkin_ws/devel/setup.bash && roslaunch mr-mapper launch.xml" 
 
 echo Running Flask Server
-start "FlaskServer" python findOrientation.py
+start "FlaskServer" python ../camera/findOrientation.py

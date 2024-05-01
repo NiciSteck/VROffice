@@ -68,9 +68,8 @@ public class ReceiveOdom : RosReceiver
             realSense.transform.localRotation = cameraRot;
         }
         
-        //call to AlignCameras to reset position
+        //call to AlignSystems to reset position
         msgsReceived = (msgsReceived + 1) % msgsReset;
-        //Debug.Log(msgsReceived);
         if (msgsReceived == 0)
         {
             if (_alignSystems != null)

@@ -1,11 +1,8 @@
-import math
 import itertools
-from tqdm import tqdm
 from scipy.optimize import basinhopping,minimize
 import numpy as np
 from scipy.spatial.transform import Rotation
-import matplotlib.pyplot as plt
-from flask import Flask, render_template, request
+from flask import Flask, request
 
 
 app = Flask(__name__)
@@ -26,12 +23,10 @@ def array_permutations(labels,points):
 def getCenteredPoints(points):
     return points - np.mean(points, axis=0)
 
-
+#get rough alignment of surfaces and check get rid of noisy detections
 def recursive_init_rotation(leftoverLabels, originalSourceLabels, originalSourcePoints, originalTargetLabels, originalTargetPoints, permutationArraySource, permutationArrayTarget):
     #base case
     if leftoverLabels.size == 0:
-        # print(permutationArraySource)
-        # print(permutationArrayTarget)
         sourceLabels = originalSourceLabels[permutationArraySource]
         sourcePoints = originalSourcePoints[permutationArraySource]
         centeredSourcePoints = sourcePoints - np.mean(sourcePoints, axis=0)
@@ -96,7 +91,7 @@ def get_planewise_centroids(labels, points):
 def objective(quat, envPlanesLables, envPlanesPoints, mrPlanes):
     rot = Rotation.from_quat(quat)
     fittedEnv = list(zip(envPlanesLables,Rotation.apply(rot,envPlanesPoints)))
-    #find the sum of the distances between the pointsin fittedEnvPoints and the closes point in mrPlanesPoints
+    #find the sum of the distances between the points in fittedEnvPoints and the closest point in mrPlanesPoints if they have the same label
     sumOfDistances = 0
     for envLabel, envPoint in fittedEnv:
         minDistance = np.inf
@@ -112,7 +107,8 @@ def objective(quat, envPlanesLables, envPlanesPoints, mrPlanes):
 def find_rot(envLabels, envPoints, mrLabels, mrPoints):
 
     originalNumberOfRecognizedPlanes = mrLabels.size
-    #sanitize MrPlanes
+
+    #remove all captured surfaces which have a label that does not appear in the environment
     mrLabelsSanitized = np.copy(mrLabels)
     mrPointsSanitized = np.copy(mrPoints)
     for i in range(mrLabels.size):
@@ -123,23 +119,25 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     mrLabels = mrLabelsSanitized
     mrPoints = mrPointsSanitized
 
-    #check if we didnt sanitize all points
+    #check have any surfaces left to align
     assert mrPoints.size > 0
 
-    #check that we received all the planes
+    #check that have received points corresponding to a set of surfaces
     assert envLabels.size % 4 == 0
     assert mrLabels.size % 4 == 0
 
     initRot = [0,0,0,1]
 
+    #get centroids
     envCentroidsLabels, envCentroids = get_planewise_centroids(envLabels, envPoints)
     mrCentroidsLabels, mrCentroids = get_planewise_centroids(mrLabels, mrPoints)
 
+    #get rough rotation and the combination of surfaces that ignores noisy surfaces
     initRes, initRot, initPermEnv, initPermMr = recursive_init_rotation(envCentroidsLabels, envCentroidsLabels, envCentroids, mrCentroidsLabels, mrCentroids, [], [])
-    print(initRes)
-    print(initPermEnv)
-    print(initPermMr)
 
+    print(initRes)
+
+    #apply combination
     mrLabels = np.concatenate(np.array(np.split(mrLabels, mrLabels.size/4))[initPermMr])
     mrPoints = np.vstack(np.array(np.vsplit(mrPoints, mrPoints[:,0].size/4))[initPermMr])
     mrMean = np.mean(mrPoints, axis=0)
@@ -150,7 +148,10 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
     envMean = np.mean(envPoints, axis=0)
     centeredEnv = envPoints - envMean
 
+    #find the final rotation
     solution = basinhopping(objective, initRot, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, niter_success=10)
+
+    #if the alignment is bad try again
     if(solution.fun > 0.1):
         secondSolution = basinhopping(objective, solution.x, minimizer_kwargs = {"args": (envLabels,centeredEnv,list(zip(mrLabels,centeredMr)))}, niter_success=10)
         if(secondSolution.fun < solution.fun):
@@ -161,14 +162,11 @@ def find_rot(envLabels, envPoints, mrLabels, mrPoints):
             solution = secondSolution
 
     print(solution.fun)
+
     normalizedQuat = Rotation.from_quat(solution.x).as_quat()
-    print(normalizedQuat)
 
-    noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 0.01 #probably sensible to adjust depending on size of environment (the bgger the env the smaller the penalty).
-
-    print(originalNumberOfRecognizedPlanes)
-    print(mrLabels.size)
-    print(noisePenalty)
+    #add a penalty for ignoring surfaces through the noise elimination
+    noisePenalty = (originalNumberOfRecognizedPlanes - mrLabels.size) * 0.01 #DEV COMMENT: probably sensible to adjust depending on size of environment (the bigger the env the smaller the penalty). maybe add penalty in rough alignment already (testing required)
 
     return normalizedQuat, solution.fun + noisePenalty , envMean, mrMean
 
@@ -180,15 +178,18 @@ def json_to_array(pointList):
         points.append(point["point"])
     return np.array(labels), np.array(points)
 
+#returns the result
 @app.get("/result")
 def getResult():
     return result
 
+#resets the "completed" flag of the result
 @app.put("/reset")
 def putReset():
     result["completed"] = False
     return result, 200
 
+#receive input for calibration
 @app.put("/result")
 def putResult():
     if request.is_json:

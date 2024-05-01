@@ -47,13 +47,18 @@ public class AlignSystems : MonoBehaviour
 
             float absPosDiff = posDiff.magnitude;
             float absRotDiff = 2f * Mathf.Rad2Deg * Mathf.Acos(Mathf.Abs(rotDiff.w));
-
-
-            transform.rotation = rotDiff * transform.rotation;
-            isPos = realSense.transform.position;
-            posDiff = shouldPos - isPos;
-            transform.position = posDiff + transform.position;
-            Debug.Log("Resetting Oculus offset");
+            const float tPos = 0.05f;
+            const float tRot = 10f;
+            
+            //move the entire MRMapper object to realign cameras and other children based on that
+            if (absPosDiff > tPos || absRotDiff > tRot)
+            {
+                transform.rotation = rotDiff * transform.rotation;
+                isPos = realSense.transform.position;
+                posDiff = shouldPos - isPos;
+                transform.position = posDiff + transform.position;
+                //Debug.Log("Resetting Oculus offset");
+            }
         }
     }
 }

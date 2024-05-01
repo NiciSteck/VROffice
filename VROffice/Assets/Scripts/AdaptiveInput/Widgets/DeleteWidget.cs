@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * Widget that allows the user to delete Elements by placing them in the Trash
+ */
+
 public class DeleteWidget : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)

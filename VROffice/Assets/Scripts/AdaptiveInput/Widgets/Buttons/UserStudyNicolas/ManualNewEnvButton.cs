@@ -4,6 +4,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+/*
+ * This button starts the Manual Definition of an Environment
+ */
+
 public class ManualNewEnvButton : MenuButton
 {
     public List<GameObject> otherButtons;

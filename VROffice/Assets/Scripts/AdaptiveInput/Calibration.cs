@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * This script handles the manual calibration of an Environment
+ */
+
 public class Calibration : MonoBehaviour
 {
     public static Calibration Calibrator;

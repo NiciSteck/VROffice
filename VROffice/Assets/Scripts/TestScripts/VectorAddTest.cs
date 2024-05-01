@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VectorAdd : MonoBehaviour
+public class VectorAddTest : MonoBehaviour
 {
     public Vector3 dist_fromQuestToRealSense = new Vector3(0, 0.05f, 0);
 

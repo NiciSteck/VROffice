@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO; 
 
+/*
+ * This script is a subset from the InteractionAdapt VirtualEnvironmentManager. It allows for interaction with Elements. (For the full feature set check out InteractionAdapt)
+ */
+
 public class VirtualEnvironmentManager : MonoBehaviour
 {
     public static VirtualEnvironmentManager Environment;

@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * This button starts the Calibration of an Environment
+ */
+
 public class AutomaticOldEnvButton : MenuButton
 {
     public List<GameObject> otherButtons;

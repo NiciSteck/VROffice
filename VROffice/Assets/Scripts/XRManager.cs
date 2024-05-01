@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * This script controlls the Passthrough of the HMD
+ */
+
 public class XRManager : MonoBehaviour
 {
     public static XRManager Manager;

@@ -4,6 +4,10 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
+/*
+ * This script turns the captured surfaces from MRMapper into an Environment and saves it
+ */
+
 public class BuildEnv : MonoBehaviour
 {
     public PhysicalEnvironmentManager pEnvManager;
@@ -34,6 +38,7 @@ public class BuildEnv : MonoBehaviour
         buildPrev = build;
     }
 
+    //submit the corners of the surfaces to the PhysicalEnvironmentManager to build the Environment
     private IEnumerator setPoints(Transform env)
     {
         pEnvManager.Env = env;

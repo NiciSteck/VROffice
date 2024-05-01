@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * This script aligns Elements to the Environment to demonstrating the role of InteractionAdapt
+ */
+
 public class AllocateElements : MonoBehaviour
 {
     public bool allocate;

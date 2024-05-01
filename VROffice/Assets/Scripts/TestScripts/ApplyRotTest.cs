@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class applyRot : MonoBehaviour
+public class ApplyRotTest : MonoBehaviour
 {
     [SerializeField] private GameObject reference;
     // Start is called before the first frame update

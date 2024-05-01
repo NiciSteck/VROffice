@@ -37,20 +37,6 @@ public static class Constants
         { "PASTE", EventModifiers.Control }
     };
 
-    // public static Dictionary<string, Vector3> m_taskElementLayout = new Dictionary<string, Vector3>()
-    // {
-    //     {"seq-notification", new Vector3(-0.36f,0.45f,0.50f)},
-    //     {"seq-map", new Vector3(-0.38f,0.22f,0.52f) },
-    //     {"seq-presentation", new Vector3(-0.19f,-0.16f,0.62f) },
-    //     {"par-1-spreadsheet-1", new Vector3(0.51f,-0.14f,0.53f) },
-    //     {"par-1-spreadsheet-2", new Vector3(0.20f,-0.14F,0.63f) },
-    //     {"par-2-video", new Vector3(0.30f,0.29f,0.62f) },
-    //     {"par-2-chat", new Vector3(-0.08F,0.28f,0.59f) },
-    //     {"par-3-keyboard", new Vector3(-0.11f,-0.38f,0.40f) },
-    //     {"par-3-document", new Vector3(-0.53f,-0.21f, 0.50f) }
-    // };
-
-    public enum Environment { EMPTY, WORKSTATION, WALL, NONE };
     // public static Dictionary<AdaptiveLayout.LayoutAdaptationMethod, string> m_environmentLabels = new Dictionary<AdaptiveLayout.LayoutAdaptationMethod, string>() 
     // {
     //     { AdaptiveLayout.LayoutAdaptationMethod.FIXED, "User-centered" },

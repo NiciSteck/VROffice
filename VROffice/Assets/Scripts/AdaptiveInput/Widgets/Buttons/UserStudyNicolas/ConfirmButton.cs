@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * This button confirms the users actions and moves to the next menu state
+ */
+
+
 public class ConfirmButton : MenuButton
 {
     public enum Caller
@@ -43,11 +48,11 @@ public class ConfirmButton : MenuButton
                 environments.GetComponent<BuildEnv>().build = true;
                 break;
             case Caller.AutomaticOld:
-                environments.GetComponent<RecognizeEnv>().align = true;
+                environments.GetComponent<CalibrateEnv>().calibrate = true;
                 break;
         }
         XRManager.Manager.setImmersive();
-        //menuHandle.gameObject.SetActive(true);
+        menuHandle.gameObject.SetActive(true);
         Transform user = Camera.main.transform;
         menuHandle.position = user.position + user.forward * 0.5f + user.right * 0.2f;
         menuHandle.rotation = Quaternion.LookRotation(menuHandle.position - user.position);

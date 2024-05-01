@@ -6,9 +6,13 @@ using System.Linq;
 using UnityEngine;
 using Directory = UnityEngine.Windows.Directory;
 
+/*
+ * This script saves and loads environments from a json file
+ */
+
 public class SerializeEnvs : MonoBehaviour
 {
-    private string dataDirPath = "";
+    private string dataDirPath = "SavedEnvs";
     private string dataFileName = "EnvsData.json";
 
     public GameObject prefabContainer;
@@ -52,8 +56,9 @@ public class SerializeEnvs : MonoBehaviour
                     }
                 }
                 EnvironmentsData data = JsonUtility.FromJson<EnvironmentsData>(dataToLoad);
+                
+                //makes sure that only the loaded Environments exist in the scene
                 foreach (Transform child in transform) {
-                    //get rid of the inspector envs to avoid duplicated because they are also serialized
                     Destroy(child.gameObject);
                 }
 
@@ -89,6 +94,7 @@ public class SerializeEnvs : MonoBehaviour
         
     }
     
+    //centers the surfaces around the Environments centroid
     public void centerOnChildren(Transform parent)
     {
         List<Transform> children = parent.Cast<Transform>().ToList();

@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+/*
+ * This script handles the manual Definition of an Environment
+ */
+
 public class PhysicalEnvironmentManager : MonoBehaviour
 {
     private int m_pointsSet;
@@ -409,6 +413,8 @@ public class PhysicalEnvironmentManager : MonoBehaviour
                 + m_controllerOffset.x * (rotation * Vector3.right)
                 + m_controllerOffset.y * (rotation * Vector3.up)
                 + m_controllerOffset.z * (rotation * Vector3.forward);
+            
+            //mrDefinePoint and mrPoint set by BuildEnv when an Environment is built from captured Surfaces
             if (mrDefinePoint)
             {
                 updatePoint(mrPoint, rotation);

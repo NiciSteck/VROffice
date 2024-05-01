@@ -4,6 +4,10 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+/*
+ * This button shows the user the previous saved Environment
+ */
+
 public class PrevButton : MenuButton
 {
     public ManualOldEnvButton oldButton;
@@ -14,7 +18,6 @@ public class PrevButton : MenuButton
         List<Transform> envs = oldButton.environmentsTransforms;
         Transform oldFirst = envs.First();
         oldFirst.gameObject.SetActive(false);
-        Debug.Log("before StopRoutine prev");
         StopCoroutine(activeSpinRoutine);
         oldFirst.localScale = Vector3.one;
         
@@ -25,7 +28,6 @@ public class PrevButton : MenuButton
                             Vector3.ProjectOnPlane(transform.right, Vector3.up) * 0.08f;
         newFirst.localScale = Vector3.one * 0.6f;
         newFirst.gameObject.SetActive(true);
-        Debug.Log("before StartRoutine prev");
         activeSpinRoutine = StartCoroutine(Spin(newFirst));
         nextButton.activeSpinRoutine = activeSpinRoutine;
     }
