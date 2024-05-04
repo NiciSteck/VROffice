@@ -26,19 +26,12 @@ public class ReceiveOdom : RosReceiver
     [SerializeField] private int msgsReset = 1;
     private int msgsReceived = 0;
     private AlignSystems _alignSystems;
-
-    private List<String> log = new List<string>();
-    private int logIndex = 0;
+    
     
     public void Start()
     {
         Setup(port, log_tag, ProcessReceivedBytes);
         _alignSystems = GetComponent<AlignSystems>();
-    }
-    
-    void OnDestroy()
-    {
-        File.WriteAllLines(@"D:\BachelorThesis\VROffice\Logs\UnityOdomLog.txt",log);
     }
     
     private void ProcessReceivedBytes(byte[] data)
@@ -56,9 +49,6 @@ public class ReceiveOdom : RosReceiver
         q[2] = BitConverter.ToSingle(data, 20);
         q[3] = BitConverter.ToSingle(data, 24);
         Quaternion cameraRot = RtabQuatToUnity(q);
-        
-        log.Add(logIndex + ": " + cameraPos.ToString("F5") + ", " + cameraRot.ToString("F5"));
-        logIndex++;
         
 
         //update RealSense transform
