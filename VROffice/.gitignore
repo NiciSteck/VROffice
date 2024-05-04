@@ -71,13 +71,3 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
-# Oculus 
-/[Aa]ssets/Oculus
-
-# Browser 
-/[Aa]ssets/ZFBrowser
-
-/BrowserProfile/*
-
-/[Aa]ssets/TextMesh\ Pro
-
