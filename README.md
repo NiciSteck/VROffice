@@ -30,7 +30,7 @@ To use the features of VROffice your system needs to meet the following requirem
 - [Python 3](https://www.python.org/) with [virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) installed
 
 ### Unity Project
-The unity project is located inside the [VROffice-Unity](https://github.com/eth-siplab-students/t-bt-2023-MREnvironment-NicolasSteck/tree/master/source/VROffice/VROffice-Unity) folder. You can set it up using Unity Hub (Open -> Add project from disk).
+The unity project is located inside the [VROffice-Unity](https://github.com/NiciSteck/VROffice/tree/main/VROffice) folder. You can set it up using Unity Hub (Open -> Add project from disk).
 
 ### MRMapper
 
@@ -99,15 +99,3 @@ Once you see all captured surfaces displayed in unity you can convert the surfac
 **Calibration:**
 Once you see all captured surfaces displayed in unity you can calibrate an environment by setting the `calibrate` boolean on the `CalibrateEnv` script.
 *The `recenter` boolean just realigns the active environment instead of going through all saved environments.*
-
-## Resource Locations
-The location of some of the more important resources and scripts of this project for your convenience.
-
-* Communications in Teams-Channel: `SIPLAB student projects 2022/2023 / 2023 BT MR office workspace Nicolas Steck`
-* [Thesis](https://github.com/eth-siplab-students/t-bt-2023-MREnvironment-NicolasSteck/blob/master/thesis/Bachelor_thesis_Nicolas_Steck.pdf)
-* [Latex Thesis](https://www.overleaf.com/project/651d17e68a734f8fcd1b76b6)
-* [Alignment Python Script](https://github.com/eth-siplab-students/t-bt-2023-MREnvironment-NicolasSteck/blob/master/source/VROffice/MRMapper/camera/findOrientation.py)
-* [Automatic Calibration Unity Script](https://github.com/eth-siplab-students/t-bt-2023-MREnvironment-NicolasSteck/blob/master/source/VROffice/VROffice-Unity/Assets/Scripts/CalibrateEnv.cs)
-* [Automatic Definition Unity Script](https://github.com/eth-siplab-students/t-bt-2023-MREnvironment-NicolasSteck/blob/master/source/VROffice/VROffice-Unity/Assets/Scripts/BuildEnv.cs)
-* [Manual Calibration Unity Script](https://github.com/eth-siplab-students/t-bt-2023-MREnvironment-NicolasSteck/blob/master/source/VROffice/VROffice-Unity/Assets/Scripts/AdaptiveInput/Calibration.cs)
-* [Manual Definition Unity Script](https://github.com/eth-siplab-students/t-bt-2023-MREnvironment-NicolasSteck/blob/master/source/VROffice/VROffice-Unity/Assets/Scripts/AdaptiveInput/PhysicalEnvironmentManager.cs)
